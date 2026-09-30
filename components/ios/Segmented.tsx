@@ -6,7 +6,8 @@ type Option<T extends string> = { value: T; label: string };
 
 type SegmentedProps<T extends string> = {
   options: readonly Option<T>[];
-  value: T;
+  /** null = nothing chosen yet (e.g. a required onboarding choice). */
+  value: T | null;
   onChange: (value: T) => void;
   label: string;
 };
@@ -45,7 +46,7 @@ export function Segmented<T extends string>({
             type="button"
             role="radio"
             aria-checked={selected}
-            tabIndex={selected ? 0 : -1}
+            tabIndex={selected || (value === null && i === 0) ? 0 : -1}
             onClick={() => onChange(opt.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
             className={`relative min-w-0 flex-1 truncate rounded-[8px] px-1 text-[13px] transition-[background-color,box-shadow] duration-150 after:absolute after:inset-x-0 after:-top-1 after:-bottom-1 after:content-[''] focus-visible:outline-2 focus-visible:outline-accent ${

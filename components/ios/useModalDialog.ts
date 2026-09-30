@@ -8,7 +8,13 @@ export function useModalDialog(open: boolean, onClose: () => void) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
+    if (open && !el.open) {
+      el.showModal();
+      // Content is mounted while the dialog is closed, so React's autoFocus has already fired.
+      el.querySelector<HTMLElement>(
+        "[data-autofocus], input:not([type=hidden]):not([type=checkbox]), textarea",
+      )?.focus();
+    }
     if (!open && el.open) el.close();
   }, [open]);
 

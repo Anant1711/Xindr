@@ -69,7 +69,7 @@ export function ActionSheet({
         </div>
         <button
           type="button"
-          autoFocus
+          data-autofocus
           onClick={onClose}
           className={`${itemClass} mt-2 rounded-[14px] bg-white font-semibold text-accent`}
         >
