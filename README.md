@@ -9,7 +9,7 @@ A mobile-first PWA that helps people find a gym buddy nearby. Platonic, hyperloc
 | Phase | Scope                           | State       |
 | ----- | ------------------------------- | ----------- |
 | 0     | Scaffold, iOS component kit, CI | Done        |
-| 1     | Database, RLS tests, dev seed   | Not started |
+| 1     | Database, RLS tests, dev seed   | Done        |
 | 2     | Auth and onboarding             | Not started |
 | 3     | Nearby and buddy profile        | Not started |
 | 4     | Ask to Train and requests       | Not started |
@@ -21,17 +21,30 @@ A mobile-first PWA that helps people find a gym buddy nearby. Platonic, hyperloc
 
 - Node.js 20.9+ (CI uses 22)
 - pnpm (`npm install -g pnpm`)
-- Docker Desktop, running (needed for the local Supabase stack from Phase 1)
+- Docker Desktop, running (the local Supabase stack runs in Docker)
 
 ## Setup
 
 ```bash
 pnpm install
-cp .env.example .env.local   # fill in values; see below
+pnpm db:start                # local Supabase; first run pulls images, applies migrations
+pnpm exec supabase status    # shows API URL, anon key, service role key
+cp .env.example .env.local   # paste the values from `supabase status`
+ALLOW_DEV_SEED=true pnpm db:seed   # optional: 12 demo users
 pnpm dev                     # http://localhost:3000
 ```
 
+Local services: Studio <http://127.0.0.1:54323>, Mailpit (catches sign-in codes) <http://127.0.0.1:54324>.
+
 In development, the component kit is at <http://localhost:3000/dev/components> (returns 404 in production).
+
+## Database
+
+- Schema: `supabase/migrations/0001_init.sql` (applied verbatim from the spec). Change it only by adding a new migration.
+- Tests: `pnpm db:test` runs the pgTAP suite in `supabase/tests/` (visibility, RLS, RPC rules, messaging, blocking).
+- Types: after a schema change run `pnpm db:types` to regenerate `lib/database.types.ts`.
+- Reset: `pnpm db:reset` re-applies migrations to an empty local database (re-run the seed after).
+- Seed: `scripts/seed-dev.ts` refuses to run unless `ALLOW_DEV_SEED=true` **and** the Supabase URL is local or listed in `DEV_PROJECT_REFS` inside the script. Never add the production project. Demo users (`demo+<name>@example.com`) sign in with the email code; locally the code appears in Mailpit.
 
 ## Environment variables
 
@@ -47,15 +60,15 @@ Never commit `.env.local`. Never give the service-role key a `NEXT_PUBLIC_` pref
 
 ## Scripts
 
-| Command          | What it does                        |
-| ---------------- | ----------------------------------- |
-| `pnpm dev`       | Dev server                          |
-| `pnpm build`     | Production build                    |
-| `pnpm typecheck` | `tsc --noEmit`                      |
-| `pnpm lint`      | ESLint                              |
-| `pnpm format`    | Prettier (write)                    |
-| `pnpm test`      | Vitest unit tests                   |
-| `pnpm db:test`   | pgTAP database tests (from Phase 1) |
+| Command          | What it does         |
+| ---------------- | -------------------- |
+| `pnpm dev`       | Dev server           |
+| `pnpm build`     | Production build     |
+| `pnpm typecheck` | `tsc --noEmit`       |
+| `pnpm lint`      | ESLint               |
+| `pnpm format`    | Prettier (write)     |
+| `pnpm test`      | Vitest unit tests    |
+| `pnpm db:test`   | pgTAP database tests |
 
 CI (`.github/workflows/ci.yml`) runs typecheck, lint, format check and unit tests on every push and PR.
 
