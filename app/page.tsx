@@ -1,19 +1,6 @@
-import Link from "next/link";
-import { StateMessage } from "@/components/ios/StateMessage";
+import { redirect } from "next/navigation";
+import { getAuthState, homeFor } from "@/lib/auth";
 
-// Placeholder until Phase 2 adds auth routing (no session → /login, no profile → /onboarding, else /nearby).
-export default function Home() {
-  return (
-    <StateMessage
-      title="Gym Buddy"
-      body="Scaffold is running."
-      action={
-        process.env.NODE_ENV !== "production" ? (
-          <Link href="/dev/components" className="text-body text-accent">
-            View components
-          </Link>
-        ) : null
-      }
-    />
-  );
+export default async function Home() {
+  redirect(homeFor(await getAuthState()));
 }
