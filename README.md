@@ -14,7 +14,7 @@ A mobile-first PWA that helps people find a gym buddy nearby. Platonic, hyperloc
 | 3     | Nearby and buddy profile        | Done        |
 | 4     | Ask to Train and requests       | Done        |
 | 5     | Chat                            | Done        |
-| 6     | Safety and account              | Not started |
+| 6     | Safety and account              | Done        |
 | 7     | PWA, polish, deploy             | Not started |
 
 ## Design
@@ -45,6 +45,7 @@ In development, the component kit is at <http://localhost:3000/dev/components> (
 ## Database
 
 - Schema: `supabase/migrations/0001_init.sql` (applied verbatim from the spec). Change it only by adding a new migration.
+- `0002_blocked_people.sql` adds `my_blocked_people()`, so the Profile tab can list people you blocked (RLS hides a blocked person's profile row by design). The spec's optional Phase 8 migration becomes `0003_checkins.sql`.
 - Tests: `pnpm db:test` runs the pgTAP suite in `supabase/tests/` (visibility, RLS, RPC rules, messaging, blocking).
 - Types: after a schema change run `pnpm db:types` to regenerate `lib/database.types.ts`.
 - Reset: `pnpm db:reset` re-applies migrations to an empty local database (re-run the seed after).
@@ -97,6 +98,31 @@ proxy.ts              session refresh + signed-out redirect
 supabase/             Supabase CLI config, migrations, pgTAP tests
 docs/BUILD_SPEC.md    the spec
 ```
+
+## Security
+
+- RLS on every table; discovery only through `nearby_profiles()` / `get_buddy_profile()`.
+- The service-role key is used only in `app/api/account/delete/route.ts` and `scripts/seed-dev.ts`.
+- `next.config.ts` sets a Content-Security-Policy (allows only this app plus the Supabase URL and its websocket), `X-Frame-Options: DENY`, `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy`.
+- Message and note text is always rendered as plain text (lint forbids `dangerouslySetInnerHTML`).
+- Deleting an account removes the auth user; everything cascades. Reports and feedback the person filed are kept without the link to them (schema: `on delete set null`).
+
+## Manual QA checklist
+
+Run with two browsers (one normal, one private) signed in as different users. Locally, read sign-in codes in Mailpit.
+
+1. Sign up as A (woman) and B (man): email code, onboarding, land on Nearby. Sign out and back in: onboarding is skipped.
+2. A turns on "Only women can see me": B no longer sees A in Nearby, and A's profile URL shows "Not available" for B.
+3. B filters Nearby by level; opens a profile; overlap pills match shared days at the same time of day.
+4. A asks B to train: B's Chats badge and NEW REQUEST appear without refreshing. Decline: A's WAITING row disappears live. Ask again, accept: both see the chat.
+5. Chat both ways in real time; check read state, day separators, plan card. Turn the network off and send: "Not sent. Tap to retry", then retry.
+6. End the conversation from one side: the other side becomes read-only ("This conversation has ended.").
+7. Report from a profile and from a chat; block from a profile: you return to Nearby and neither sees the other. Unblock from Profile > Blocked people.
+8. Pause in Profile: you disappear from the other person's Nearby, and your Nearby shows the paused message. Unpause.
+9. Edit My details and Preferences; switch gender to Man and confirm "Only women can see me" turns off.
+10. Send feedback; "My area isn't listed" during onboarding.
+11. Delete account: confirm, land on login with the confirmation; check in Supabase Studio that the user's rows are gone.
+12. Repeat the core flow on a real iPhone in Safari and as an installed PWA (Phase 7).
 
 ## Notes
 
