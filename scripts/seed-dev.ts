@@ -99,7 +99,7 @@ const DEMO_USERS: Demo[] = [
     gender: "woman",
     level: "intermediate",
     area: "Pimple Gurav",
-    devGym: 2,
+
     time_of_day: "morning",
     training_days: [0, 2, 4, 6],
     focus: "Strength",

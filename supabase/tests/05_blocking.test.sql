@@ -63,7 +63,7 @@ select is((select count(*) from nearby_profiles() where id = 'cccccccc-0000-0000
 select set_config('request.jwt.claims', '{"sub":"eeeeeeee-0000-0000-0000-000000000000"}', true);
 delete from blocks where blocker_id = 'aaaaaaaa-0000-0000-0000-000000000000';
 reset role;
-select is((select count(*) from blocks), 1::bigint, 'you cannot delete someone else''s block');
+select is((select count(*) from blocks where blocker_id = 'aaaaaaaa-0000-0000-0000-000000000000'), 1::bigint, 'you cannot delete someone else''s block');
 
 select * from finish();
 rollback;

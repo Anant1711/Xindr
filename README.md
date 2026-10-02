@@ -11,7 +11,7 @@ A mobile-first PWA that helps people find a gym buddy nearby. Platonic, hyperloc
 | 0     | Scaffold, iOS component kit, CI | Done        |
 | 1     | Database, RLS tests, dev seed   | Done        |
 | 2     | Auth and onboarding             | Done        |
-| 3     | Nearby and buddy profile        | Not started |
+| 3     | Nearby and buddy profile        | Done        |
 | 4     | Ask to Train and requests       | Not started |
 | 5     | Chat                            | Not started |
 | 6     | Safety and account              | Not started |
