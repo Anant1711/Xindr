@@ -54,3 +54,21 @@ export type ProfileInput = z.input<typeof profileInputSchema>;
 export const feedbackSchema = z.object({
   message: z.string().trim().min(1).max(LIMITS.feedback),
 });
+
+export const REPORT_REASONS = [
+  "harassment",
+  "fake_profile",
+  "inappropriate_message",
+  "unsafe_behavior",
+  "other",
+] as const;
+
+export const reportSchema = z.object({
+  reportedId: z.uuid(),
+  reason: z.enum(REPORT_REASONS),
+  details: z
+    .string()
+    .trim()
+    .max(LIMITS.reportDetails)
+    .transform((s) => (s ? s : null)),
+});

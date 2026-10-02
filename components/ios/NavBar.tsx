@@ -82,9 +82,13 @@ export function NavButton({
 export function BackButton({
   label = "Back",
   href,
+  fallbackHref = "/",
 }: {
   label?: string;
+  /** Always go here. */
   href?: string;
+  /** Go back in history, or here when the page was opened directly. */
+  fallbackHref?: string;
 }) {
   const router = useRouter();
   const content = (
@@ -94,5 +98,14 @@ export function BackButton({
     </>
   );
   if (href) return <NavButton href={href}>{content}</NavButton>;
-  return <NavButton onClick={() => router.back()}>{content}</NavButton>;
+  return (
+    <NavButton
+      onClick={() => {
+        if (window.history.length > 1) router.back();
+        else router.push(fallbackHref);
+      }}
+    >
+      {content}
+    </NavButton>
+  );
 }

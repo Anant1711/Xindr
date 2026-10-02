@@ -11,9 +11,8 @@ export function useModalDialog(open: boolean, onClose: () => void) {
     if (open && !el.open) {
       el.showModal();
       // Content is mounted while the dialog is closed, so React's autoFocus has already fired.
-      el.querySelector<HTMLElement>(
-        "[data-autofocus], input:not([type=hidden]):not([type=checkbox]), textarea",
-      )?.focus();
+      // Only opt-in fields: focusing a text box by default pops the keyboard over the content.
+      el.querySelector<HTMLElement>("[data-autofocus]")?.focus();
     }
     if (!open && el.open) el.close();
   }, [open]);

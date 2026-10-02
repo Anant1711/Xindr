@@ -5,6 +5,7 @@ import {
   feedbackSchema,
   otpSchema,
   profileInputSchema,
+  reportSchema,
   type ProfileInput,
 } from "./validation";
 
@@ -96,6 +97,32 @@ describe("feedbackSchema", () => {
     expect(feedbackSchema.safeParse({ message: "   " }).success).toBe(false);
     expect(
       feedbackSchema.safeParse({ message: "x".repeat(1001) }).success,
+    ).toBe(false);
+  });
+});
+
+describe("reportSchema", () => {
+  const id = "3f2b8c1e-5d4a-4f6b-9c8d-7e6f5a4b3c2d";
+  it("accepts a reason with blank details as null", () => {
+    expect(
+      reportSchema.parse({
+        reportedId: id,
+        reason: "harassment",
+        details: "  ",
+      }).details,
+    ).toBeNull();
+  });
+  it("rejects unknown reasons and long details", () => {
+    expect(
+      reportSchema.safeParse({ reportedId: id, reason: "spam", details: "" })
+        .success,
+    ).toBe(false);
+    expect(
+      reportSchema.safeParse({
+        reportedId: id,
+        reason: "other",
+        details: "x".repeat(1001),
+      }).success,
     ).toBe(false);
   });
 });
