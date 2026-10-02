@@ -18,6 +18,7 @@ export default async function BlockedPage() {
         left={<BackButton href="/profile" label="Back to Profile" />}
         title="Blocked people"
       />
+      <h1 className="sr-only">Blocked people</h1>
       {data.length === 0 ? (
         <StateMessage
           title="No one blocked"

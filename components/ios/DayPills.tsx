@@ -38,7 +38,7 @@ export function DayPills({
               aria-pressed={active}
               aria-label={name}
               onClick={() => onToggle(i)}
-              className={`${cls} relative after:absolute after:-inset-[2px] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`}
+              className={`${cls} relative after:absolute after:-inset-[3px] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`}
             >
               {DAY_LETTER[i]}
             </button>

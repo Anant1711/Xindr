@@ -152,7 +152,7 @@ export function LoginForm({
               <br />
               GYM BUDDY
             </h1>
-            <p className="max-w-[300px] text-[16px] leading-6 text-white/85">
+            <p className="max-w-[300px] text-[16px] leading-6 text-white/90">
               Train with people near you. No streaks, no scrolling. Just showing
               up together.
             </p>
@@ -162,7 +162,7 @@ export function LoginForm({
           {accountDeleted && !error ? (
             <p
               role="status"
-              className="rounded-xl bg-white/15 px-3 py-2 text-center text-sub"
+              className="rounded-xl bg-black/20 px-3 py-2 text-center text-sub"
             >
               Your account and data have been deleted.
             </p>
@@ -170,7 +170,7 @@ export function LoginForm({
           {error ? (
             <p
               role="alert"
-              className="rounded-xl bg-white/15 px-3 py-2 text-center text-sub"
+              className="rounded-xl bg-black/20 px-3 py-2 text-center text-sub"
             >
               {error}
             </p>
@@ -191,7 +191,7 @@ export function LoginForm({
             <GoogleMark />
             Continue with Google
           </button>
-          <p className="mt-1 text-center text-foot text-white/80">
+          <p className="mt-1 text-center text-foot text-white/90">
             For adults 18 and over. A platonic app for finding training
             partners.
           </p>

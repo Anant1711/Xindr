@@ -81,7 +81,7 @@ export function ListRow({
         ) : null}
         {trailing}
         {selected ? <Checkmark className="shrink-0 text-accent" /> : null}
-        {chevron ? <ChevronRight className="shrink-0 text-[#b5b8bf]" /> : null}
+        {chevron ? <ChevronRight className="shrink-0 text-[#8e9198]" /> : null}
       </div>
     </>
   );

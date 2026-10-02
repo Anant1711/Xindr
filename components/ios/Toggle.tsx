@@ -25,7 +25,7 @@ export function Toggle({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-[31px] w-[51px] shrink-0 items-center rounded-full transition-colors duration-200 after:absolute after:inset-x-0 after:-inset-y-[7px] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-40 ${
-        checked ? "bg-accent" : "bg-track"
+        checked ? "bg-accent" : "bg-track ring-1 ring-[#8e9198] ring-inset"
       }`}
     >
       <span

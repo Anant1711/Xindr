@@ -205,11 +205,12 @@ export function Thread({
   return (
     <div className="fixed inset-0 z-10 mx-auto flex max-w-[430px] flex-col bg-white">
       <header className="pt-safe shrink-0 border-b border-separator bg-white">
+        <h1 className="sr-only">Chat with {other.name}</h1>
         <div className="flex h-[60px] items-center gap-3 px-4">
           <BackButton fallbackHref="/chats" label="Back to Chats" />
           <Link
             href={`/people/${other.id}`}
-            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-accent"
+            className="flex min-h-[44px] min-w-0 flex-1 items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-accent"
           >
             <Avatar
               id={other.id}
