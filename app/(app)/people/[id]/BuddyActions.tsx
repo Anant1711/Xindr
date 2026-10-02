@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ios/Button";
 import { useToast } from "@/components/ios/Toast";
 import { SAFETY_LINE } from "@/lib/constants";
 import type { Relationship } from "@/lib/relationship";
-import { cancelRequest, respondToRequest, type ActionResult } from "./actions";
+import { cancelRequest, respondToRequest } from "@/app/actions/requests";
 
 type Props = {
   personId: string;
@@ -30,9 +31,13 @@ export function BuddyActions({
     null,
   );
 
+  const router = useRouter();
+
   function run(
     which: "cancel" | "accept" | "decline",
-    action: () => Promise<ActionResult>,
+    action: () => Promise<
+      { ok: true; matchId?: string | null } | { ok: false; error: string }
+    >,
     done: string,
   ) {
     setBusy(which);
@@ -40,6 +45,7 @@ export function BuddyActions({
       const res = await action();
       setBusy(null);
       toast.show(res.ok ? done : res.error);
+      if (res.ok && res.matchId) router.push(`/chats/${res.matchId}`);
     });
   }
 
