@@ -30,9 +30,13 @@ export default async function LoginPage(props: PageProps<"/login">) {
   const state = await getAuthState();
   if (state.userId) redirect(homeFor(state));
 
-  const { error } = await props.searchParams;
+  const { error, deleted } = await props.searchParams;
   const googleEnabled = await isGoogleEnabled();
   return (
-    <LoginForm googleEnabled={googleEnabled} callbackError={error === "auth"} />
+    <LoginForm
+      googleEnabled={googleEnabled}
+      callbackError={error === "auth"}
+      accountDeleted={deleted === "1"}
+    />
   );
 }

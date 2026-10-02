@@ -17,9 +17,11 @@ export const fieldClass =
 export function LoginForm({
   googleEnabled,
   callbackError,
+  accountDeleted = false,
 }: {
   googleEnabled: boolean;
   callbackError: boolean;
+  accountDeleted?: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -157,6 +159,14 @@ export function LoginForm({
           </div>
         </div>
         <div className="pb-safe flex flex-col gap-3 px-5 pb-10">
+          {accountDeleted && !error ? (
+            <p
+              role="status"
+              className="rounded-xl bg-white/15 px-3 py-2 text-center text-sub"
+            >
+              Your account and data have been deleted.
+            </p>
+          ) : null}
           {error ? (
             <p
               role="alert"
