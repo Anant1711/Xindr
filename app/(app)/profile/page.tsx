@@ -5,7 +5,8 @@ import { LargeTitle } from "@/components/ios/LargeTitle";
 import { ListGroup } from "@/components/ios/ListGroup";
 import { ListRow } from "@/components/ios/ListRow";
 import { requireProfile } from "@/lib/auth";
-import { displayName, levelLabel } from "@/lib/format";
+import { levelLabel } from "@/lib/format";
+import { nameFor } from "@/lib/names";
 import {
   DeleteAccountRow,
   FeedbackRow,
@@ -19,7 +20,7 @@ const SHOW_ME_LABEL = { women: "Women", men: "Men", anyone: "Anyone" } as const;
 
 export default async function ProfilePage() {
   const { supabase, userId } = await requireProfile();
-  const [{ data: me }, blocked] = await Promise.all([
+  const [{ data: me }, blocked, lastName] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -28,6 +29,7 @@ export default async function ProfilePage() {
       .eq("id", userId)
       .single(),
     supabase.rpc("my_blocked_people"),
+    supabase.rpc("visible_last_name", { p_id: userId }),
   ]);
   if (!me) throw new Error("Could not load profile");
   const blockedCount = blocked.data?.length ?? 0;
@@ -45,7 +47,7 @@ export default async function ProfilePage() {
         />
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-[20px] leading-[22px]">
-            {displayName(me.first_name, me.last_initial)}
+            {nameFor(me.first_name, me.last_initial, lastName.data)}
           </p>
           <p className="mt-1 truncate text-sub text-secondary">
             {levelLabel(me.level)} · {me.areas.name}

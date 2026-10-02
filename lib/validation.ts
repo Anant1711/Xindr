@@ -14,11 +14,13 @@ export const otpSchema = z
 
 export const aboutYouSchema = z.object({
   firstName: z.string().trim().min(1).max(LIMITS.firstName),
-  lastInitial: z
+  // Any script; starts with a letter; spaces, hyphens, apostrophes and dots allowed.
+  lastName: z
     .string()
     .trim()
-    .regex(/^[A-Za-z]$/)
-    .transform((s) => s.toUpperCase()),
+    .min(1)
+    .max(LIMITS.lastName)
+    .regex(/^\p{L}[\p{L}\p{M} .'’-]*$/u),
   gender: z.enum(GENDERS),
   level: z.enum(LEVELS),
   areaId: z.number().int().positive(),

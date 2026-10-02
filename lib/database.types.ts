@@ -139,13 +139,13 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "area_id": number,"avatar_url": string | null,"confirmed_18_at": string,"created_at": string,"first_name": string,"focus": string | null,"gender": Database["public"]['Enums']["gender_t"],"gym_id": string | null,"id": string,"is_active": boolean,"last_initial": string,"level": Database["public"]['Enums']["level_t"],"show_me": Database["public"]['Enums']["show_me_t"],"time_of_day": Database["public"]['Enums']["time_of_day_t"],"training_days": (number)[],"updated_at": string,"women_only_visibility": boolean
+                    "area_id": number,"avatar_url": string | null,"confirmed_18_at": string,"created_at": string,"first_name": string,"focus": string | null,"gender": Database["public"]['Enums']["gender_t"],"gym_id": string | null,"id": string,"is_active": boolean,"last_initial": string,"last_name": string | null,"level": Database["public"]['Enums']["level_t"],"show_me": Database["public"]['Enums']["show_me_t"],"time_of_day": Database["public"]['Enums']["time_of_day_t"],"training_days": (number)[],"updated_at": string,"women_only_visibility": boolean
                   }
                   Insert: {
-                    "area_id": number,"avatar_url"?: string | null,"confirmed_18_at": string,"created_at"?: string,"first_name": string,"focus"?: string | null,"gender": Database["public"]['Enums']["gender_t"],"gym_id"?: string | null,"id": string,"is_active"?: boolean,"last_initial": string,"level": Database["public"]['Enums']["level_t"],"show_me"?: Database["public"]['Enums']["show_me_t"],"time_of_day": Database["public"]['Enums']["time_of_day_t"],"training_days"?: (number)[],"updated_at"?: string,"women_only_visibility"?: boolean
+                    "area_id": number,"avatar_url"?: string | null,"confirmed_18_at": string,"created_at"?: string,"first_name": string,"focus"?: string | null,"gender": Database["public"]['Enums']["gender_t"],"gym_id"?: string | null,"id": string,"is_active"?: boolean,"last_initial": string,"last_name"?: string | null,"level": Database["public"]['Enums']["level_t"],"show_me"?: Database["public"]['Enums']["show_me_t"],"time_of_day": Database["public"]['Enums']["time_of_day_t"],"training_days"?: (number)[],"updated_at"?: string,"women_only_visibility"?: boolean
                   }
                   Update: {
-                    "area_id"?: number,"avatar_url"?: string | null,"confirmed_18_at"?: string,"created_at"?: string,"first_name"?: string,"focus"?: string | null,"gender"?: Database["public"]['Enums']["gender_t"],"gym_id"?: string | null,"id"?: string,"is_active"?: boolean,"last_initial"?: string,"level"?: Database["public"]['Enums']["level_t"],"show_me"?: Database["public"]['Enums']["show_me_t"],"time_of_day"?: Database["public"]['Enums']["time_of_day_t"],"training_days"?: (number)[],"updated_at"?: string,"women_only_visibility"?: boolean
+                    "area_id"?: number,"avatar_url"?: string | null,"confirmed_18_at"?: string,"created_at"?: string,"first_name"?: string,"focus"?: string | null,"gender"?: Database["public"]['Enums']["gender_t"],"gym_id"?: string | null,"id"?: string,"is_active"?: boolean,"last_initial"?: string,"last_name"?: string | null,"level"?: Database["public"]['Enums']["level_t"],"show_me"?: Database["public"]['Enums']["show_me_t"],"time_of_day"?: Database["public"]['Enums']["time_of_day_t"],"training_days"?: (number)[],"updated_at"?: string,"women_only_visibility"?: boolean
                   }
                   Relationships: [
                     {
@@ -260,6 +260,11 @@ isOneToOne: false
               "ended": boolean,"last_at": string,"last_body": string,"match_id": string,"other_first_name": string,"other_id": string,"other_last_initial": string,"unread_count": number
             }[]
                            },
+"my_match_last_names":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "last_name": string,"other_id": string
+            }[]
+                           },
 "nearby_profiles":
 { Args: { "p_level"?: Database["public"]['Enums']["level_t"],"p_limit"?: number }; Returns: Database["public"]['CompositeTypes']["buddy_card"][]
                           SetofOptions: {
@@ -276,6 +281,9 @@ isOneToOne: false
                            },
 "shared_days":
 { Args: { "a": string,"b": string }; Returns: (number)[]
+                           },
+"visible_last_name":
+{ Args: { "p_id": string }; Returns: string
                            }
           }
           Enums: {

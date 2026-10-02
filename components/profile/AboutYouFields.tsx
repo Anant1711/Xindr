@@ -87,29 +87,24 @@ export function AboutYouFields({
               className={inputClass}
             />
           </div>
-          <div className="w-[92px]">
-            <label htmlFor="last-initial" className="sr-only">
-              Last initial
+          <div className="flex-1">
+            <label htmlFor="last-name" className="sr-only">
+              Last name
             </label>
             <input
-              id="last-initial"
-              placeholder="Initial"
-              autoComplete="off"
-              autoCapitalize="characters"
-              maxLength={1}
-              value={value.lastInitial}
-              onChange={(e) =>
-                set(
-                  "lastInitial",
-                  e.target.value.replace(/[^A-Za-z]/g, "").toUpperCase(),
-                )
-              }
-              className={`${inputClass} text-center`}
+              id="last-name"
+              placeholder="Last name"
+              autoComplete="family-name"
+              maxLength={LIMITS.lastName}
+              value={value.lastName}
+              onChange={(e) => set("lastName", e.target.value)}
+              className={inputClass}
             />
           </div>
         </div>
         <p className="mt-2 text-sub text-secondary">
-          Others see your first name and last initial only.
+          People nearby see your first name and last initial. Your full last
+          name is shown only to people you&apos;ve matched with.
         </p>
       </Field>
 

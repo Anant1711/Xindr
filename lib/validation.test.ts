@@ -12,7 +12,7 @@ import {
 
 const base: ProfileInput = {
   firstName: "  Priya ",
-  lastInitial: "s",
+  lastName: " Shah ",
   gender: "woman",
   level: "beginner",
   areaId: 1,
@@ -29,7 +29,7 @@ describe("profileInputSchema", () => {
   it("normalises valid input", () => {
     const out = profileInputSchema.parse(base);
     expect(out.firstName).toBe("Priya");
-    expect(out.lastInitial).toBe("S");
+    expect(out.lastName).toBe("Shah");
     expect(out.trainingDays).toEqual([0, 2, 4]);
     expect(out.focus).toBeNull();
   });
@@ -56,8 +56,10 @@ describe("aboutYouSchema", () => {
   it.each([
     ["empty first name", { firstName: " " }],
     ["first name over 30", { firstName: "x".repeat(31) }],
-    ["two-letter initial", { lastInitial: "Ab" }],
-    ["non-letter initial", { lastInitial: "1" }],
+    ["empty last name", { lastName: " " }],
+    ["last name over 40", { lastName: "x".repeat(41) }],
+    ["last name starting with a digit", { lastName: "1Shah" }],
+    ["last name with symbols", { lastName: "Shah<script>" }],
     ["no training days", { trainingDays: [] }],
     ["day out of range", { trainingDays: [7] }],
     ["focus over 60", { focus: "x".repeat(61) }],
@@ -76,6 +78,17 @@ describe("aboutYouSchema", () => {
     expect(out.focus).toBe("Strength");
     expect(out.gymId).toBe("3f2b8c1e-5d4a-4f6b-9c8d-7e6f5a4b3c2d");
   });
+});
+
+describe("last names", () => {
+  it.each(["D'Souza", "Van der Berg", "Ó Briain", "Kulkarni-Shah", "शर्मा"])(
+    "accepts %s",
+    (lastName) => {
+      expect(aboutYouSchema.safeParse({ ...base, lastName }).success).toBe(
+        true,
+      );
+    },
+  );
 });
 
 describe("email and code", () => {

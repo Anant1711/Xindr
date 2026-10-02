@@ -24,6 +24,7 @@ export const DAY_LETTER = ["M", "T", "W", "T", "F", "S", "S"] as const;
 
 export const LIMITS = {
   firstName: 30,
+  lastName: 40,
   focus: 60,
   note: 200,
   message: 2000,

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/auth";
+import { initialOf } from "@/lib/names";
 import { profileInputSchema, type ProfileInput } from "@/lib/validation";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -24,7 +25,8 @@ export async function createProfile(
   const { error } = await supabase.from("profiles").insert({
     id: userId,
     first_name: p.firstName,
-    last_initial: p.lastInitial,
+    last_name: p.lastName,
+    last_initial: initialOf(p.lastName),
     gender: p.gender,
     level: p.level,
     area_id: p.areaId,

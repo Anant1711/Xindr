@@ -12,16 +12,19 @@ export default function PrivacyPage() {
           people.
         </li>
         <li>
-          Your profile: first name, last initial, gender, level, area, gym,
-          usual training time and days, and an optional focus.
+          Your profile: first and last name (taken from Google if you sign in
+          with it, editable), gender, level, area, gym, usual training time and
+          days, and an optional focus.
         </li>
         <li>Your requests, messages, reports and blocks.</li>
       </ul>
       <h2>What others see</h2>
       <p>
-        Your first name and last initial, gender, level, area, gym, training
-        times and days, focus, and an approximate distance between areas. Never
-        your email or exact location.
+        People nearby see your first name and last initial, gender, level, area,
+        gym, training times and days, focus, and an approximate distance between
+        areas. Your full last name is shown only to people you&apos;ve matched
+        with (and hidden again if either of you blocks the other). Never your
+        email or exact location.
       </p>
       <h2>Your controls</h2>
       <ul>

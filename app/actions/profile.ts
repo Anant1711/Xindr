@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getAuthState } from "@/lib/auth";
+import { initialOf } from "@/lib/names";
 import {
   aboutYouSchema,
   feedbackSchema,
@@ -36,7 +37,8 @@ export async function updateDetails(input: AboutYouInput): Promise<Result> {
     .from("profiles")
     .update({
       first_name: p.firstName,
-      last_initial: p.lastInitial,
+      last_name: p.lastName,
+      last_initial: initialOf(p.lastName),
       gender: p.gender,
       level: p.level,
       area_id: p.areaId,

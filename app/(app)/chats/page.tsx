@@ -5,16 +5,20 @@ import { SectionLabel } from "@/components/ios/ListGroup";
 import { StateMessage } from "@/components/ios/StateMessage";
 import { requireProfile } from "@/lib/auth";
 import { getChatsOverview } from "@/lib/chats";
-import { displayName, relativeTime, slotLabel } from "@/lib/format";
+import { relativeTime, slotLabel } from "@/lib/format";
+import { nameFor } from "@/lib/names";
 import { RequestCard, WaitingRow } from "./RequestRows";
 
 export const metadata = { title: "Chats" };
 
 export default async function ChatsPage() {
   const { supabase, userId } = await requireProfile();
-  const { incoming, outgoing, conversations } = await getChatsOverview(
-    supabase,
-    userId,
+  const [{ incoming, outgoing, conversations }, lastNames] = await Promise.all([
+    getChatsOverview(supabase, userId),
+    supabase.rpc("my_match_last_names"),
+  ]);
+  const lastNameOf = new Map(
+    (lastNames.data ?? []).map((r) => [r.other_id, r.last_name]),
   );
   const now = new Date();
 
@@ -79,9 +83,10 @@ export default async function ChatsPage() {
           <ul>
             {conversations.map((c) => {
               const unread = Number(c.unread_count) > 0 && !c.ended;
-              const name = displayName(
+              const name = nameFor(
                 c.other_first_name,
                 c.other_last_initial,
+                lastNameOf.get(c.other_id),
               );
               return (
                 <li key={c.match_id}>

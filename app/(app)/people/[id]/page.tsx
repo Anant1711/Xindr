@@ -6,13 +6,13 @@ import { SectionLabel } from "@/components/ios/ListGroup";
 import { requireProfile } from "@/lib/auth";
 import { buddyCardsSchema } from "@/lib/buddy";
 import {
-  displayName,
   distanceLabel,
   genderLabel,
   levelLabel,
   slotLabel,
   timeOfDayLabel,
 } from "@/lib/format";
+import { nameFor } from "@/lib/names";
 import { getRelationship } from "@/lib/relationship";
 import { BuddyActions } from "./BuddyActions";
 import { BuddyNav } from "./BuddyNav";
@@ -33,7 +33,12 @@ export default async function BuddyPage(props: PageProps<"/people/[id]">) {
   if (!person) notFound();
 
   const relationship = await getRelationship(supabase, userId, id);
-  const name = displayName(person.first_name, person.last_initial);
+  // Full last name only once matched (the function returns null otherwise).
+  const lastName =
+    relationship.kind === "matched"
+      ? (await supabase.rpc("visible_last_name", { p_id: id })).data
+      : null;
+  const name = nameFor(person.first_name, person.last_initial, lastName);
   const distance = distanceLabel(person);
   const shared = person.shared_days.length;
   const when = person.time_of_day === "morning" ? "mornings" : "evenings";

@@ -48,6 +48,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+priya@example.com",
     first_name: "Priya",
     last_initial: "S",
+
+    last_name: "Sharma",
     gender: "woman",
     level: "beginner",
     area: "Pimple Saudagar",
@@ -61,6 +63,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+rohan@example.com",
     first_name: "Rohan",
     last_initial: "K",
+
+    last_name: "Kulkarni",
     gender: "man",
     level: "intermediate",
     area: "Pimple Saudagar",
@@ -73,6 +77,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+aisha@example.com",
     first_name: "Aisha",
     last_initial: "M",
+
+    last_name: "Mehta",
     gender: "woman",
     level: "beginner",
     area: "Wakad",
@@ -85,6 +91,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+vikram@example.com",
     first_name: "Vikram",
     last_initial: "P",
+
+    last_name: "Patil",
     gender: "man",
     level: "pro",
     area: "Pimpri",
@@ -96,6 +104,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+neha@example.com",
     first_name: "Neha",
     last_initial: "J",
+
+    last_name: "Joshi",
     gender: "woman",
     level: "intermediate",
     area: "Pimple Gurav",
@@ -108,6 +118,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+arjun@example.com",
     first_name: "Arjun",
     last_initial: "D",
+
+    last_name: "Deshmukh",
     gender: "man",
     level: "beginner",
     area: "Pimple Saudagar",
@@ -119,6 +131,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+sam@example.com",
     first_name: "Sam",
     last_initial: "R",
+
+    last_name: "Rodrigues",
     gender: "other",
     level: "intermediate",
     area: "Chinchwad",
@@ -130,6 +144,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+meera@example.com",
     first_name: "Meera",
     last_initial: "T",
+
+    last_name: "Thakur",
     gender: "woman",
     level: "pro",
     area: "Baner",
@@ -142,6 +158,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+kabir@example.com",
     first_name: "Kabir",
     last_initial: "N",
+
+    last_name: "Nair",
     gender: "man",
     level: "intermediate",
     area: "Aundh",
@@ -154,6 +172,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+isha@example.com",
     first_name: "Isha",
     last_initial: "G",
+
+    last_name: "Gokhale",
     gender: "woman",
     level: "beginner",
     area: "Pimple Saudagar",
@@ -166,6 +186,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+dev@example.com",
     first_name: "Dev",
     last_initial: "A",
+
+    last_name: "Apte",
     gender: "man",
     level: "beginner",
     area: "Wakad",
@@ -178,6 +200,8 @@ const DEMO_USERS: Demo[] = [
     email: "demo+alex@example.com",
     first_name: "Alex",
     last_initial: "V",
+
+    last_name: "Varghese",
     gender: "other",
     level: "beginner",
     area: "Pimple Saudagar",

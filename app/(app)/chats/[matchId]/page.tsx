@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { requireProfile } from "@/lib/auth";
 import { buddyCardsSchema } from "@/lib/buddy";
-import { displayName, slotLabel } from "@/lib/format";
+import { slotLabel } from "@/lib/format";
+import { nameFor } from "@/lib/names";
 import { Thread } from "./Thread";
 
 export const metadata = { title: "Chat" };
@@ -27,7 +28,7 @@ export default async function ThreadPage(props: PageProps<"/chats/[matchId]">) {
 
   const otherId = match.user_a === userId ? match.user_b : match.user_a;
 
-  const [conversation, history, other, me] = await Promise.all([
+  const [conversation, history, other, me, otherLastName] = await Promise.all([
     // Names come from my_conversations, which still works after a block ends the chat.
     supabase
       .rpc("my_conversations")
@@ -44,6 +45,7 @@ export default async function ThreadPage(props: PageProps<"/chats/[matchId]">) {
       .select("area:areas(name), gym:gyms(name)")
       .eq("id", userId)
       .single(),
+    supabase.rpc("visible_last_name", { p_id: otherId }),
   ]);
   if (!conversation || history.error) notFound();
 
@@ -63,9 +65,10 @@ export default async function ThreadPage(props: PageProps<"/chats/[matchId]">) {
         id: otherId,
         firstName: conversation.other_first_name,
         lastInitial: conversation.other_last_initial,
-        name: displayName(
+        name: nameFor(
           conversation.other_first_name,
           conversation.other_last_initial,
+          otherLastName.data,
         ),
       }}
       plan={plan}

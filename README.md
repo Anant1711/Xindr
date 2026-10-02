@@ -45,7 +45,7 @@ In development, the component kit is at <http://localhost:3000/dev/components> (
 ## Database
 
 - Schema: `supabase/migrations/0001_init.sql` (applied verbatim from the spec). Change it only by adding a new migration.
-- `0002_blocked_people.sql` adds `my_blocked_people()`, so the Profile tab can list people you blocked (RLS hides a blocked person's profile row by design). The spec's optional Phase 8 migration becomes `0003_checkins.sql`.
+- `0002_blocked_people.sql` adds `my_blocked_people()`, so the Profile tab can list people you blocked (RLS hides a blocked person's profile row by design). `0003_last_name.sql` adds the full last name, readable only by you and by people you're matched with (column-level privilege + `visible_last_name()` / `my_match_last_names()`). The spec's optional Phase 8 migration becomes `0004_checkins.sql`.
 - Tests: `pnpm db:test` runs the pgTAP suite in `supabase/tests/` (visibility, RLS, RPC rules, messaging, blocking).
 - Types: after a schema change run `pnpm db:types` to regenerate `lib/database.types.ts`.
 - Reset: `pnpm db:reset` re-applies migrations to an empty local database (re-run the seed after).
@@ -176,7 +176,7 @@ Never paste secret keys into chat, issues or commits. They go only into the Supa
 ## Production
 
 - App: https://xindr.vercel.app (Vercel project `xindr`)
-- Supabase project: `Xindr` (ref `knohcgiarfsoxqhhdxbd`, region ap-northeast-2). Migrations 0001 and 0002 applied.
+- Supabase project: `Xindr` (ref `knohcgiarfsoxqhhdxbd`, region ap-northeast-2). Migrations 0001–0003 applied.
 - Auth: Site URL and redirect URLs set; Google enabled; email OTP length 6. Pending: custom SMTP, then the code email template.
 
 ## Notes

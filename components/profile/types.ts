@@ -10,7 +10,7 @@ export type Gym = { id: string; name: string; area_id: number };
 
 export type AboutYouDraft = {
   firstName: string;
-  lastInitial: string;
+  lastName: string;
   gender: Gender | null;
   level: Level | null;
   areaId: number | null;

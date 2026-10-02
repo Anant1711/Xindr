@@ -21,7 +21,7 @@ import { createProfile } from "./actions";
 
 const EMPTY: AboutYouDraft = {
   firstName: "",
-  lastInitial: "",
+  lastName: "",
   gender: null,
   level: null,
   areaId: null,
@@ -42,9 +42,20 @@ function StepCount({ step }: { step: 1 | 2 }) {
   );
 }
 
-export function Onboarding({ areas, gyms }: { areas: Area[]; gyms: Gym[] }) {
+export function Onboarding({
+  areas,
+  gyms,
+  initialNames,
+}: {
+  areas: Area[];
+  gyms: Gym[];
+  initialNames: { firstName: string; lastName: string };
+}) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [about, setAbout] = useState<AboutYouDraft>(EMPTY);
+  const [about, setAbout] = useState<AboutYouDraft>({
+    ...EMPTY,
+    ...initialNames,
+  });
   const [prefs, setPrefs] = useState<PreferencesDraft>({
     showMe: "anyone",
     womenOnlyVisibility: false,
