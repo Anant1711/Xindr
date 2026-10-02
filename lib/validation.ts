@@ -72,3 +72,5 @@ export const reportSchema = z.object({
     .max(LIMITS.reportDetails)
     .transform((s) => (s ? s : null)),
 });
+
+export const messageSchema = z.string().trim().min(1).max(LIMITS.message);

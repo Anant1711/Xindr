@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  dayLabel,
   displayName,
   distanceLabel,
   genderLabel,
   levelLabel,
   relativeTime,
+  sameDay,
   slotLabel,
+  timeLabel,
   timeOfDayLabel,
 } from "./format";
 
@@ -84,5 +87,20 @@ describe("relativeTime (Asia/Kolkata)", () => {
   });
   it("shows day and month for older dates", () => {
     expect(relativeTime(new Date("2026-09-12T12:00:00Z"), NOW)).toBe("12 Sep");
+  });
+});
+
+describe("dayLabel / timeLabel / sameDay (Asia/Kolkata)", () => {
+  it("labels today, yesterday and older days", () => {
+    expect(dayLabel(new Date("2026-10-01T02:00:00Z"), NOW)).toBe("Today");
+    expect(dayLabel(new Date("2026-09-30T15:00:00Z"), NOW)).toBe("Yesterday");
+    expect(dayLabel(new Date("2026-09-12T12:00:00Z"), NOW)).toBe("Sat, 12 Sep");
+  });
+  it("uses the IST day: 23:30 UTC on 30 Sep is 1 Oct in IST", () => {
+    expect(dayLabel(new Date("2026-09-30T19:00:00Z"), NOW)).toBe("Today");
+    expect(sameDay(new Date("2026-09-30T19:00:00Z"), NOW)).toBe(true);
+  });
+  it("formats times", () => {
+    expect(timeLabel(new Date("2026-10-01T13:00:00Z"))).toBe("6:30 PM");
   });
 });

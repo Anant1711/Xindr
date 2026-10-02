@@ -74,3 +74,25 @@ export function relativeTime(
   if (offset === -1) return "Yesterday";
   return formatInTimeZone(date, tz, "d MMM");
 }
+
+/** Chat day separator: "Today", "Yesterday", else "Mon, 12 Oct" (in APP_TZ). */
+export function dayLabel(
+  date: Date,
+  now: Date = new Date(),
+  tz: string = APP_TZ,
+) {
+  const offset = dayOffset(date, now, tz);
+  if (offset === 0) return "Today";
+  if (offset === -1) return "Yesterday";
+  return formatInTimeZone(date, tz, "EEE, d MMM");
+}
+
+/** "6:30 PM" in APP_TZ. */
+export function timeLabel(date: Date, tz: string = APP_TZ) {
+  return formatInTimeZone(date, tz, "h:mm a");
+}
+
+/** Same calendar day in APP_TZ. */
+export function sameDay(a: Date, b: Date, tz: string = APP_TZ) {
+  return dayOffset(a, b, tz) === 0;
+}

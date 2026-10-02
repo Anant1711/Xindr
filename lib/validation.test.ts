@@ -3,6 +3,7 @@ import {
   aboutYouSchema,
   emailSchema,
   feedbackSchema,
+  messageSchema,
   otpSchema,
   profileInputSchema,
   reportSchema,
@@ -124,5 +125,14 @@ describe("reportSchema", () => {
         details: "x".repeat(1001),
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("messageSchema", () => {
+  it("trims and bounds message bodies", () => {
+    expect(messageSchema.parse("  hi  ")).toBe("hi");
+    expect(messageSchema.safeParse("   ").success).toBe(false);
+    expect(messageSchema.safeParse("x".repeat(2000)).success).toBe(true);
+    expect(messageSchema.safeParse("x".repeat(2001)).success).toBe(false);
   });
 });
