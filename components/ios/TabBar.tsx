@@ -15,7 +15,11 @@ const tabs = [
 export function TabBar({ chatsBadge = 0 }: TabBarProps) {
   const pathname = usePathname();
   // Pushed detail screens (a person, Ask to Train, a chat thread) have their own bottom action, no tab bar.
-  if (pathname.startsWith("/people/") || /^\/chats\/[^/]+$/.test(pathname))
+  if (
+    pathname.startsWith("/people/") ||
+    pathname.startsWith("/profile/") ||
+    /^\/chats\/[^/]+$/.test(pathname)
+  )
     return null;
   return (
     <nav

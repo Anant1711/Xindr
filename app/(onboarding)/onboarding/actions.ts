@@ -2,11 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/auth";
-import {
-  feedbackSchema,
-  profileInputSchema,
-  type ProfileInput,
-} from "@/lib/validation";
+import { profileInputSchema, type ProfileInput } from "@/lib/validation";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -44,20 +40,4 @@ export async function createProfile(
   if (error && error.code !== "23505") return { ok: false, error: GENERIC };
 
   redirect("/nearby");
-}
-
-export async function requestArea(message: string): Promise<ActionResult> {
-  const parsed = feedbackSchema.safeParse({ message });
-  if (!parsed.success) return { ok: false, error: "Tell us your area." };
-
-  const { supabase, userId } = await getAuthState();
-  if (!userId)
-    return { ok: false, error: "Your session ended. Please sign in again." };
-
-  const { error } = await supabase.from("feedback").insert({
-    user_id: userId,
-    kind: "area_request",
-    message: parsed.data.message,
-  });
-  return error ? { ok: false, error: GENERIC } : { ok: true };
 }

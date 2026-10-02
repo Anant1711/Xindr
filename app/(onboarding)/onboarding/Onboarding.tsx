@@ -16,7 +16,8 @@ import type {
 } from "@/components/profile/types";
 import { SAFETY_LINE } from "@/lib/constants";
 import { aboutYouSchema } from "@/lib/validation";
-import { createProfile, requestArea } from "./actions";
+import { requestArea } from "@/app/actions/profile";
+import { createProfile } from "./actions";
 
 const EMPTY: AboutYouDraft = {
   firstName: "",

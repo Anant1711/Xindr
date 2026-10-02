@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { InviteButton } from "@/components/InviteButton";
 import { Avatar } from "@/components/ios/Avatar";
+import { buttonClass } from "@/components/ios/Button";
 import { SectionLabel } from "@/components/ios/ListGroup";
 import { StateMessage } from "@/components/ios/StateMessage";
 import { requireProfile } from "@/lib/auth";
@@ -22,10 +23,29 @@ export async function NearbyList({ level }: { level: LevelFilter }) {
   const { supabase, userId } = await requireProfile();
 
   const [me, nearby] = await Promise.all([
-    supabase.from("profiles").select("areas(name)").eq("id", userId).single(),
+    supabase
+      .from("profiles")
+      .select("is_active, areas(name)")
+      .eq("id", userId)
+      .single(),
     supabase.rpc("nearby_profiles", level === "all" ? {} : { p_level: level }),
   ]);
   if (me.error || nearby.error) throw new Error("Could not load nearby people");
+
+  // Discovery needs both people active, so a paused profile sees no one.
+  if (!me.data.is_active) {
+    return (
+      <StateMessage
+        title="Your profile is paused"
+        body="While paused, you're hidden from Nearby and Nearby is hidden from you. Your chats stay open."
+        action={
+          <Link href="/profile" className={buttonClass("secondary")}>
+            Manage in Profile
+          </Link>
+        }
+      />
+    );
+  }
 
   const people = buddyCardsSchema.parse(nearby.data);
 
