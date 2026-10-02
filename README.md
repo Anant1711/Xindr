@@ -139,8 +139,8 @@ Never paste secret keys into chat, issues or commits. They go only into the Supa
    ```
    `<your-ref>` is the part of the project URL before `.supabase.co`.
 3. Dashboard > **Authentication > URL Configuration**: Site URL = your Vercel URL (e.g. `https://xindr.vercel.app`). Redirect URLs: `https://<your-vercel-domain>/auth/callback` and `http://localhost:3000/auth/callback`.
-4. Dashboard > **Authentication > Emails > Templates**: paste `supabase/templates/code.html` into **Magic Link** and **Confirm signup** (subject: "Your Gym Buddy sign-in code"). The template must contain `{{ .Token }}`.
-5. Email sending: the built-in sender allows only a few emails per hour. Before inviting real users, set **Authentication > Emails > SMTP** to Resend or Brevo. Until then, prefer Google sign-in for testers.
+4. Email templates: on the free tier, templates can only be changed after **custom SMTP** is set (step 5). Until then Supabase sends its default email with a **sign-in link**; the app accepts it (tap it on the same device). After SMTP, paste `supabase/templates/code.html` into **Magic Link** and **Confirm signup** (subject: "Your Gym Buddy sign-in code") so emails show the 6-digit `{{ .Token }}`, and keep **Email OTP length = 6**.
+5. Email sending: the built-in sender allows only 2 emails per hour. Before inviting real users, set **Authentication > Emails > SMTP** to Resend or Brevo. Until then, prefer Google sign-in for testers.
 6. Data: add real gyms in **Table Editor > gyms** (never invented names) and check the coordinates in **areas** on a map.
 7. Optional but recommended: **Database > Extensions** enable `pg_cron`, then in the SQL editor:
    ```sql
@@ -156,8 +156,8 @@ Never paste secret keys into chat, issues or commits. They go only into the Supa
 
 ### 3. Vercel
 
-1. vercel.com > **Add New > Project** > import the GitHub repo `Anant1711/Xindr`. Framework: Next.js (detected). Install command: `pnpm install`.
-2. **Environment variables** (Production), from Supabase > Project Settings > API:
+1. vercel.com > **Add New > Project** > import the GitHub repo `Anant1711/Xindr`. `vercel.json` pins the Next.js preset and the `icn1` (Seoul) region, next to the Supabase project; change the region if the database moves.
+2. **Environment variables** (Production), from Supabase > Project Settings > API. The **names must match exactly**:
    | Name                            | Value                                           |
    | ------------------------------- | ----------------------------------------------- |
    | `NEXT_PUBLIC_SUPABASE_URL`      | `https://<your-ref>.supabase.co`                |
@@ -172,6 +172,12 @@ Never paste secret keys into chat, issues or commits. They go only into the Supa
 - Open the Vercel URL on an iPhone in Safari: sign in, onboard, and add it to the Home Screen (Share > Add to Home Screen). It opens full-screen with the app icon.
 - Run the manual QA checklist above with two people.
 - Supabase free projects pause after about a week without traffic: keep it active or upgrade before a real launch.
+
+## Production
+
+- App: https://xindr.vercel.app (Vercel project `xindr`)
+- Supabase project: `Xindr` (ref `knohcgiarfsoxqhhdxbd`, region ap-northeast-2). Migrations 0001 and 0002 applied.
+- Auth: Site URL and redirect URLs set; Google enabled; email OTP length 6. Pending: custom SMTP, then the code email template.
 
 ## Notes
 

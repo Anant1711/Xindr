@@ -65,7 +65,11 @@ export function LoginForm({
     setError(null);
     const { error: err } = await createClient().auth.signInWithOtp({
       email: parsed.data,
-      options: { shouldCreateUser: true },
+      // If the email carries a link instead of a code, tapping it lands on /auth/callback.
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     setBusy(false);
     if (err) {
@@ -258,7 +262,8 @@ export function LoginForm({
         </h1>
         <p className="mt-2 text-[15px] text-secondary">
           We sent it to{" "}
-          <span className="font-semibold text-label">{email}</span>.
+          <span className="font-semibold text-label">{email}</span>. If the
+          email has a sign-in link instead, tap it on this device.
         </p>
         <label htmlFor="code" className="sr-only">
           6-digit code
