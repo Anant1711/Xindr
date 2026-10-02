@@ -250,6 +250,11 @@ isOneToOne: false
 "mark_messages_read":
 { Args: { "p_match": string }; Returns: undefined
                            },
+"my_blocked_people":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "blocked_at": string,"first_name": string,"id": string,"last_initial": string
+            }[]
+                           },
 "my_conversations":
 { Args: Record<PropertyKey, never>; Returns: {
               "ended": boolean,"last_at": string,"last_body": string,"match_id": string,"other_first_name": string,"other_id": string,"other_last_initial": string,"unread_count": number
