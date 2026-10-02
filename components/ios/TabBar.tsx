@@ -12,15 +12,18 @@ const tabs = [
   { href: "/profile", label: "Profile", Icon: PersonIcon },
 ] as const;
 
-export function TabBar({ chatsBadge = 0 }: TabBarProps) {
-  const pathname = usePathname();
-  // Pushed detail screens (a person, Ask to Train, a chat thread) have their own bottom action, no tab bar.
-  if (
+/** Pushed detail screens (a person, Ask to Train, a chat thread, profile sub-pages) have no tab bar. */
+export function hasTabBar(pathname: string) {
+  return !(
     pathname.startsWith("/people/") ||
     pathname.startsWith("/profile/") ||
     /^\/chats\/[^/]+$/.test(pathname)
-  )
-    return null;
+  );
+}
+
+export function TabBar({ chatsBadge = 0 }: TabBarProps) {
+  const pathname = usePathname();
+  if (!hasTabBar(pathname)) return null;
   return (
     <nav
       aria-label="Tabs"

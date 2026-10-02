@@ -20,6 +20,12 @@ const archivoBlack = Archivo_Black({
 export const metadata: Metadata = {
   title: APP_NAME,
   description: "Find a gym buddy nearby.",
+  applicationName: APP_NAME,
+  // Adds apple-mobile-web-app-capable, title and status bar style for the iOS home screen.
+  appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "default" },
+  formatDetection: { telephone: false },
+  // Next emits the newer mobile-web-app-capable; older iOS needs the Apple name too.
+  other: { "apple-mobile-web-app-capable": "yes" },
 };
 
 export const viewport: Viewport = {
