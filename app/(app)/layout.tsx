@@ -1,14 +1,16 @@
-import { TabBar } from "@/components/ios/TabBar";
+import { LiveTabBar } from "@/components/LiveTabBar";
 import { requireProfile } from "@/lib/auth";
+import { getChatsBadge } from "@/lib/chats";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  await requireProfile();
+  const { supabase, userId } = await requireProfile();
+  const badge = await getChatsBadge(supabase, userId);
   return (
     <>
       <main className="pb-[calc(50px+env(safe-area-inset-bottom)+16px)]">
         {children}
       </main>
-      <TabBar />
+      <LiveTabBar userId={userId} initialBadge={badge} />
     </>
   );
 }

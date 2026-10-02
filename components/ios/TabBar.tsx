@@ -14,6 +14,8 @@ const tabs = [
 
 export function TabBar({ chatsBadge = 0 }: TabBarProps) {
   const pathname = usePathname();
+  // Full-screen, modal-style pages (Ask to Train, a chat thread) have no tab bar.
+  if (/\/ask$/.test(pathname) || /^\/chats\/[^/]+$/.test(pathname)) return null;
   return (
     <nav
       aria-label="Tabs"
