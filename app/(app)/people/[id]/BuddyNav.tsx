@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { ActionSheet } from "@/components/ios/ActionSheet";
 import { Ellipsis } from "@/components/ios/icons";
-import { BackButton, NavBar, NavButton } from "@/components/ios/NavBar";
+import { BackButton, IconButton, NavBar } from "@/components/ios/NavBar";
 import { useToast } from "@/components/ios/Toast";
 import { ReportSheet } from "@/components/ReportSheet";
 import { blockUser } from "@/app/actions/safety";
@@ -26,9 +26,9 @@ export function BuddyNav({
       <NavBar
         left={<BackButton fallbackHref="/nearby" />}
         right={
-          <NavButton ariaLabel="More options" onClick={() => setMenu(true)}>
-            <Ellipsis />
-          </NavButton>
+          <IconButton label="More options" onClick={() => setMenu(true)}>
+            <Ellipsis size={18} />
+          </IconButton>
         }
       />
 

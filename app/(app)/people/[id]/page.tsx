@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Avatar } from "@/components/ios/Avatar";
 import { DayPills } from "@/components/ios/DayPills";
-import { ListGroup } from "@/components/ios/ListGroup";
-import { ListRow } from "@/components/ios/ListRow";
+import { SectionLabel } from "@/components/ios/ListGroup";
 import { requireProfile } from "@/lib/auth";
 import { buddyCardsSchema } from "@/lib/buddy";
 import {
@@ -39,47 +38,60 @@ export default async function BuddyPage(props: PageProps<"/people/[id]">) {
   const shared = person.shared_days.length;
   const when = person.time_of_day === "morning" ? "mornings" : "evenings";
 
+  const chip = "rounded-[10px] px-[11px] py-1 text-[12px] font-bold";
+
   return (
     <div>
       <BuddyNav personId={person.id} name={name} />
 
-      <div className="flex flex-col items-center px-4 pt-4 pb-7 text-center">
+      <div className="flex flex-col items-center gap-3.5 px-5 pt-2.5 pb-6 text-center">
         <Avatar
           id={person.id}
           firstName={person.first_name}
           lastInitial={person.last_initial}
-          size={96}
+          size={88}
         />
-        <h1 className="mt-3 text-[22px] leading-7 font-bold">{name}</h1>
-        <p className="mt-0.5 text-sub text-secondary">
-          {levelLabel(person.level)} · {genderLabel(person.gender)} ·{" "}
-          {distance.endsWith("km") ? `${distance} away` : distance}
-        </p>
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="font-display text-[26px] leading-[28px]">{name}</h1>
+          <ul
+            className="flex flex-wrap justify-center gap-2"
+            aria-label="About"
+          >
+            <li className={`${chip} bg-accent-tint text-accent`}>
+              {levelLabel(person.level)}
+            </li>
+            <li className={`${chip} bg-surface text-label`}>
+              {genderLabel(person.gender)}
+            </li>
+            <li className={`${chip} bg-surface text-label`}>
+              {distance.endsWith("km") ? `${distance} away` : distance}
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <ListGroup>
-        <ListRow
-          title="Usually trains"
-          detail={timeOfDayLabel(person.time_of_day)}
+      <dl className="mx-5 mb-6 rounded-group border border-separator px-4">
+        <DetailRow
+          label="Usually trains"
+          value={timeOfDayLabel(person.time_of_day)}
         />
-        <ListRow title="Focus" detail={person.focus ?? "Not set"} />
+        <DetailRow label="Focus" value={person.focus ?? "Not set"} />
         {person.gym_name ? (
-          <ListRow title="Gym" detail={person.gym_name} />
+          <DetailRow label="Gym" value={person.gym_name} />
         ) : null}
-      </ListGroup>
+      </dl>
 
-      <ListGroup
-        header="Your overlap"
-        footer={
-          shared > 0
-            ? `${shared} shared ${when} a week`
-            : "No overlap in your usual days yet"
-        }
-      >
-        <div className="px-4 py-3.5">
+      <section className="mb-6">
+        <SectionLabel>Your overlap</SectionLabel>
+        <div className="mx-5 flex flex-col gap-2.5 rounded-group bg-success-tint p-4">
           <DayPills label="Shared training days" days={person.shared_days} />
+          <p className="text-center text-[13px] font-semibold text-success-ink">
+            {shared > 0
+              ? `${shared} shared ${when} a week`
+              : "No overlap in your usual days yet"}
+          </p>
         </div>
-      </ListGroup>
+      </section>
 
       <BuddyActions
         personId={person.id}
@@ -91,6 +103,15 @@ export default async function BuddyPage(props: PageProps<"/people/[id]">) {
             : null
         }
       />
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-separator py-3.5 last:border-b-0">
+      <dt className="text-[13px] font-semibold text-secondary">{label}</dt>
+      <dd className="truncate text-[15px] font-semibold">{value}</dd>
     </div>
   );
 }

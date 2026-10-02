@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { DayPills } from "@/components/ios/DayPills";
-import { ListGroup } from "@/components/ios/ListGroup";
+import { ListGroup, SectionLabel } from "@/components/ios/ListGroup";
 import { ListRow } from "@/components/ios/ListRow";
-import { Segmented } from "@/components/ios/Segmented";
+import { Chips } from "@/components/ios/Chips";
 import { Sheet } from "@/components/ios/Sheet";
-import { TextFieldRow } from "@/components/ios/TextField";
 import { LIMITS } from "@/lib/constants";
 import { AreaRequestForm } from "./AreaRequestForm";
 import {
@@ -20,12 +19,31 @@ import {
 
 type Props = {
   value: AboutYouDraft;
-  onChange: (next: AboutYouDraft) => void;
+  /** Receives an updater so rapid changes never overwrite each other. */
+  onChange: (update: (prev: AboutYouDraft) => AboutYouDraft) => void;
   areas: Area[];
   gyms: Gym[];
   /** Server action that records a "my area isn't listed" request. */
   onRequestArea: (message: string) => Promise<{ ok: boolean }>;
 };
+
+const inputClass =
+  "h-[52px] w-full rounded-[14px] bg-surface px-4 text-[16px] text-label outline-none placeholder:text-secondary focus:ring-2 focus:ring-accent";
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mb-6">
+      <SectionLabel>{label}</SectionLabel>
+      <div className="px-5">{children}</div>
+    </section>
+  );
+}
 
 export function AboutYouFields({
   value,
@@ -36,71 +54,87 @@ export function AboutYouFields({
 }: Props) {
   const [sheet, setSheet] = useState<"area" | "gym" | "request" | null>(null);
   const set = <K extends keyof AboutYouDraft>(key: K, v: AboutYouDraft[K]) =>
-    onChange({ ...value, [key]: v });
+    onChange((prev) => ({ ...prev, [key]: v }));
 
   const area = areas.find((a) => a.id === value.areaId);
   const areaGyms = gyms.filter((g) => g.area_id === value.areaId);
   const gym = areaGyms.find((g) => g.id === value.gymId);
 
   function toggleDay(day: number) {
-    const days = value.trainingDays.includes(day)
-      ? value.trainingDays.filter((d) => d !== day)
-      : [...value.trainingDays, day];
-    set("trainingDays", days);
+    onChange((prev) => ({
+      ...prev,
+      trainingDays: prev.trainingDays.includes(day)
+        ? prev.trainingDays.filter((d) => d !== day)
+        : [...prev.trainingDays, day],
+    }));
   }
 
   return (
     <>
-      <ListGroup>
-        <TextFieldRow
-          id="first-name"
-          label="First name"
-          placeholder="Priya"
-          autoComplete="given-name"
-          maxLength={LIMITS.firstName}
-          value={value.firstName}
-          onChange={(e) => set("firstName", e.target.value)}
-        />
-        <TextFieldRow
-          id="last-initial"
-          label="Last initial"
-          placeholder="S"
-          autoComplete="off"
-          autoCapitalize="characters"
-          maxLength={1}
-          value={value.lastInitial}
-          onChange={(e) =>
-            set(
-              "lastInitial",
-              e.target.value.replace(/[^A-Za-z]/g, "").toUpperCase(),
-            )
-          }
-        />
-      </ListGroup>
-
-      <ListGroup header="Gender">
-        <div className="px-4 py-3">
-          <Segmented
-            label="Gender"
-            options={GENDER_OPTIONS}
-            value={value.gender}
-            onChange={(v) => set("gender", v)}
-          />
+      <Field label="Your name">
+        <div className="flex gap-2.5">
+          <div className="flex-1">
+            <label htmlFor="first-name" className="sr-only">
+              First name
+            </label>
+            <input
+              id="first-name"
+              placeholder="First name"
+              autoComplete="given-name"
+              maxLength={LIMITS.firstName}
+              value={value.firstName}
+              onChange={(e) => set("firstName", e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div className="w-[92px]">
+            <label htmlFor="last-initial" className="sr-only">
+              Last initial
+            </label>
+            <input
+              id="last-initial"
+              placeholder="Initial"
+              autoComplete="off"
+              autoCapitalize="characters"
+              maxLength={1}
+              value={value.lastInitial}
+              onChange={(e) =>
+                set(
+                  "lastInitial",
+                  e.target.value.replace(/[^A-Za-z]/g, "").toUpperCase(),
+                )
+              }
+              className={`${inputClass} text-center`}
+            />
+          </div>
         </div>
-      </ListGroup>
+        <p className="mt-2 text-sub text-secondary">
+          Others see your first name and last initial only.
+        </p>
+      </Field>
 
-      <ListGroup header="Level">
-        <div className="px-4 py-3">
-          <Segmented
-            label="Level"
-            options={LEVEL_OPTIONS}
-            value={value.level}
-            onChange={(v) => set("level", v)}
-          />
-        </div>
-      </ListGroup>
+      <Field label="I am">
+        <Chips
+          label="Gender"
+          options={GENDER_OPTIONS}
+          value={value.gender}
+          onChange={(v) => set("gender", v)}
+        />
+      </Field>
 
-      <ListGroup footer="Only your area is shown to others, never your exact location.">
+      <Field label="My level">
+        <Chips
+          label="Level"
+          options={LEVEL_OPTIONS}
+          value={value.level}
+          onChange={(v) => set("level", v)}
+        />
+      </Field>
+
+      <ListGroup
+        header="Where I train"
+        footer="Only your area is shown to others, never your exact location."
+      >
         <ListRow
           title="Area"
           detail={area?.name ?? "Choose"}
@@ -116,38 +150,37 @@ export function AboutYouFields({
         />
       </ListGroup>
 
-      <ListGroup header="Usually trains">
-        <div className="px-4 py-3">
-          <Segmented
-            label="Usually trains"
-            options={TIME_OPTIONS}
-            value={value.timeOfDay}
-            onChange={(v) => set("timeOfDay", v)}
-          />
-        </div>
-      </ListGroup>
+      <Field label="I usually train">
+        <Chips
+          label="Usually trains"
+          options={TIME_OPTIONS}
+          value={value.timeOfDay}
+          onChange={(v) => set("timeOfDay", v)}
+        />
+      </Field>
 
-      <ListGroup header="Days">
-        <div className="px-4 py-3.5">
-          <DayPills
-            label="Training days"
-            tone="accent"
-            days={value.trainingDays}
-            onToggle={toggleDay}
-          />
-        </div>
-      </ListGroup>
+      <Field label="Days I train">
+        <DayPills
+          label="Training days"
+          tone="accent"
+          days={value.trainingDays}
+          onToggle={toggleDay}
+        />
+      </Field>
 
-      <ListGroup header="Focus (optional)">
-        <TextFieldRow
+      <Field label="Focus (optional)">
+        <label htmlFor="focus" className="sr-only">
+          Focus
+        </label>
+        <input
           id="focus"
-          label="Focus"
           placeholder="Strength, general fitness"
           maxLength={LIMITS.focus}
           value={value.focus}
           onChange={(e) => set("focus", e.target.value)}
+          className={inputClass}
         />
-      </ListGroup>
+      </Field>
 
       <Sheet
         open={sheet === "area"}
@@ -163,15 +196,15 @@ export function AboutYouFields({
               role="radio"
               ariaChecked={a.id === value.areaId}
               onClick={() => {
-                onChange({
-                  ...value,
+                onChange((prev) => ({
+                  ...prev,
                   areaId: a.id,
                   gymId: gyms.some(
-                    (g) => g.id === value.gymId && g.area_id === a.id,
+                    (g) => g.id === prev.gymId && g.area_id === a.id,
                   )
-                    ? value.gymId
+                    ? prev.gymId
                     : null,
-                });
+                }));
                 setSheet(null);
               }}
             />

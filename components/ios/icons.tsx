@@ -56,19 +56,17 @@ export function Checkmark(props: IconProps) {
   );
 }
 
-export function PeopleIcon({
+export function MapPinIcon({
   filled,
   ...props
 }: IconProps & { filled?: boolean }) {
   return (
     <Svg {...props}>
-      <circle cx="9" cy="8" r="3.5" fill={filled ? "currentColor" : "none"} />
       <path
-        d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6z"
+        d="M12 21.5s7.5-6.9 7.5-12.7a7.5 7.5 0 10-15 0c0 5.8 7.5 12.7 7.5 12.7z"
         fill={filled ? "currentColor" : "none"}
       />
-      <circle cx="17" cy="9" r="2.6" />
-      <path d="M17 14c2.6 0 4.5 1.8 4.5 4.6" />
+      <circle cx="12" cy="9" r="2.8" fill={filled ? "white" : "none"} />
     </Svg>
   );
 }
@@ -80,7 +78,7 @@ export function ChatIcon({
   return (
     <Svg {...props}>
       <path
-        d="M12 4c5 0 9 3.2 9 7.3s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20.5l1.1-3.6C4.2 15.6 3 13.6 3 11.3 3 7.2 7 4 12 4z"
+        d="M3.5 5.5h17v11h-10l-5.5 4v-15z"
         fill={filled ? "currentColor" : "none"}
       />
     </Svg>
@@ -93,9 +91,32 @@ export function PersonIcon({
 }: IconProps & { filled?: boolean }) {
   return (
     <Svg {...props}>
-      <circle cx="12" cy="12" r="9.2" />
-      <circle cx="12" cy="10" r="3.2" fill={filled ? "currentColor" : "none"} />
-      <path d="M6.2 18.4c1.3-2 3.3-3.1 5.8-3.1s4.5 1.1 5.8 3.1" />
+      <circle
+        cx="12"
+        cy="8.5"
+        r="3.9"
+        fill={filled ? "currentColor" : "none"}
+      />
+      <path
+        d="M4.9 20.8c0-4.3 3.1-6.9 7.1-6.9s7.1 2.6 7.1 6.9"
+        fill={filled ? "currentColor" : "none"}
+      />
+    </Svg>
+  );
+}
+
+export function SendIcon(props: IconProps) {
+  return (
+    <Svg size={20} strokeWidth={2.2} {...props}>
+      <path d="M12 19V5M5.5 11.5L12 5l6.5 6.5" />
+    </Svg>
+  );
+}
+
+export function ShieldIcon(props: IconProps) {
+  return (
+    <Svg size={17} {...props}>
+      <path d="M12 2.8l7.5 3.2v5.9c0 5.3-3.4 8.9-7.5 10.2-4.1-1.3-7.5-4.9-7.5-10.2V6l7.5-3.2z" />
     </Svg>
   );
 }

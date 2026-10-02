@@ -50,7 +50,7 @@ export function ListRow({
   const interactive = Boolean(href || onClick);
   const outer = `flex w-full items-center gap-3 pl-4 text-left ${
     interactive
-      ? "transition-colors active:bg-[#e5e5ea] focus-visible:bg-[#e5e5ea] focus-visible:outline-none"
+      ? "transition-colors active:bg-surface focus-visible:bg-surface focus-visible:outline-none"
       : ""
   } ${dimmed ? "opacity-50" : ""} ${disabled ? "pointer-events-none opacity-40" : ""}`;
 
@@ -81,7 +81,7 @@ export function ListRow({
         ) : null}
         {trailing}
         {selected ? <Checkmark className="shrink-0 text-accent" /> : null}
-        {chevron ? <ChevronRight className="shrink-0 text-[#c4c4c7]" /> : null}
+        {chevron ? <ChevronRight className="shrink-0 text-[#b5b8bf]" /> : null}
       </div>
     </>
   );

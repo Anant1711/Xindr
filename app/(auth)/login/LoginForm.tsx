@@ -2,18 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Button } from "@/components/ios/Button";
-import { ListGroup } from "@/components/ios/ListGroup";
-import { NavBar, NavButton } from "@/components/ios/NavBar";
+import { BottomBar } from "@/components/ios/BottomBar";
+import { Button, buttonClass } from "@/components/ios/Button";
+import { BackButton, NavBar } from "@/components/ios/NavBar";
 import { useToast } from "@/components/ios/Toast";
-import { APP_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { emailSchema, otpSchema } from "@/lib/validation";
 
 type Step = "choose" | "email" | "code";
 
-const inputClass =
-  "h-[50px] w-full bg-transparent px-4 text-[17px] outline-none placeholder:text-[#c4c4c7]";
+export const fieldClass =
+  "h-14 w-full rounded-[14px] bg-surface px-4 text-[17px] text-label outline-none placeholder:text-secondary focus:ring-2 focus:ring-accent";
 
 export function LoginForm({
   googleEnabled,
@@ -104,37 +103,85 @@ export function LoginForm({
   }
 
   const errorLine = error ? (
-    <p role="alert" className="mx-8 -mt-6 mb-6 text-foot text-destructive">
+    <p role="alert" className="mt-3 text-sub text-destructive">
       {error}
     </p>
   ) : null;
 
   if (step === "choose") {
     return (
-      <main className="pt-safe flex min-h-dvh flex-col">
-        <div className="flex flex-1 flex-col justify-center px-6 text-center">
-          <h1 className="text-large-title">{APP_NAME}</h1>
-          <p className="mt-2 text-body text-secondary">
-            Find someone nearby to train with.
-          </p>
+      <main className="pt-safe flex min-h-dvh flex-col bg-accent text-white">
+        <div className="flex flex-1 flex-col items-center justify-center gap-9 px-5">
+          <svg
+            width="220"
+            height="220"
+            viewBox="0 0 260 260"
+            aria-hidden="true"
+          >
+            <circle
+              cx="130"
+              cy="130"
+              r="128"
+              stroke="rgba(255,255,255,0.18)"
+              strokeWidth="1.5"
+              fill="none"
+            />
+            <circle
+              cx="130"
+              cy="130"
+              r="92"
+              stroke="rgba(255,255,255,0.28)"
+              strokeWidth="1.5"
+              fill="none"
+            />
+            <circle
+              cx="130"
+              cy="130"
+              r="56"
+              stroke="rgba(255,255,255,0.4)"
+              fill="rgba(255,255,255,0.08)"
+              strokeWidth="1.5"
+            />
+            <circle cx="130" cy="130" r="20" fill="#FFFFFF" />
+          </svg>
+          <div className="flex flex-col items-center gap-3.5 text-center">
+            <h1 className="font-display text-[38px] leading-[40px] tracking-[-0.3px]">
+              FIND YOUR
+              <br />
+              GYM BUDDY
+            </h1>
+            <p className="max-w-[300px] text-[16px] leading-6 text-white/85">
+              Train with people near you. No streaks, no scrolling. Just showing
+              up together.
+            </p>
+          </div>
         </div>
-        <div className="pb-safe flex flex-col gap-3 px-4 pb-8">
+        <div className="pb-safe flex flex-col gap-3 px-5 pb-10">
           {error ? (
-            <p role="alert" className="text-center text-foot text-destructive">
+            <p
+              role="alert"
+              className="rounded-xl bg-white/15 px-3 py-2 text-center text-sub"
+            >
               {error}
             </p>
           ) : null}
-          <Button
-            variant="secondary"
-            className="bg-white! text-label! shadow-[0_0_0_0.5px_rgb(0_0_0/0.12)]"
+          <button
+            type="button"
+            className={`${buttonClass()} bg-white! text-accent!`}
+            onClick={() => go("email")}
+          >
+            Continue with email
+          </button>
+          <button
+            type="button"
+            className={`${buttonClass()} border-[1.5px] border-white/70 bg-transparent! text-white!`}
             onClick={continueWithGoogle}
-            loading={busy}
+            disabled={busy}
           >
             <GoogleMark />
             Continue with Google
-          </Button>
-          <Button onClick={() => go("email")}>Continue with email</Button>
-          <p className="mt-2 text-center text-foot text-secondary">
+          </button>
+          <p className="mt-1 text-center text-foot text-white/80">
             For adults 18 and over. A platonic app for finding training
             partners.
           </p>
@@ -146,37 +193,37 @@ export function LoginForm({
   if (step === "email") {
     return (
       <main className="min-h-dvh">
-        <NavBar
-          modal
-          title="Email"
-          left={<NavButton onClick={() => go("choose")}>Back</NavButton>}
-        />
-        <form id="email-form" onSubmit={sendCode} className="pt-6" noValidate>
-          <ListGroup footer="We'll email you a 6-digit code. No password needed.">
-            <label htmlFor="email" className="sr-only">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </ListGroup>
+        <NavBar left={<BackButton href="/login" label="Back" />} />
+        <form onSubmit={sendCode} noValidate className="px-5 pt-2">
+          <h1 className="font-display text-[30px] leading-[32px]">
+            What&apos;s your email?
+          </h1>
+          <p className="mt-2 text-[15px] text-secondary">
+            We&apos;ll send you a 6-digit code. No password needed.
+          </p>
+          <label htmlFor="email" className="sr-only">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            autoFocus
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={`${fieldClass} mt-7`}
+          />
           {errorLine}
-          <div className="px-4">
+          <BottomBar>
             <Button type="submit" loading={busy} disabled={!email.trim()}>
               Send code
             </Button>
-          </div>
+          </BottomBar>
         </form>
       </main>
     );
@@ -185,42 +232,55 @@ export function LoginForm({
   return (
     <main className="min-h-dvh">
       <NavBar
-        modal
-        title="Enter Code"
-        left={<NavButton onClick={() => go("email")}>Back</NavButton>}
+        left={
+          <button
+            type="button"
+            onClick={() => go("email")}
+            className="inline-flex min-h-[44px] items-center text-[15px] font-semibold text-secondary"
+          >
+            Change email
+          </button>
+        }
       />
-      <form onSubmit={verify} className="pt-6" noValidate>
-        <p className="mx-8 mb-4 text-sub text-secondary">
-          We sent a code to <span className="text-label">{email}</span>.
+      <form onSubmit={verify} noValidate className="px-5 pt-2">
+        <h1 className="font-display text-[30px] leading-[32px]">
+          Enter your code
+        </h1>
+        <p className="mt-2 text-[15px] text-secondary">
+          We sent it to{" "}
+          <span className="font-semibold text-label">{email}</span>.
         </p>
-        <ListGroup>
-          <label htmlFor="code" className="sr-only">
-            6-digit code
-          </label>
-          <input
-            id="code"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]*"
-            maxLength={6}
-            autoFocus
-            placeholder="123456"
-            value={code}
-            onChange={(e) =>
-              setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
-            }
-            className={`${inputClass} text-center text-[22px] tracking-[0.4em]`}
-          />
-        </ListGroup>
+        <label htmlFor="code" className="sr-only">
+          6-digit code
+        </label>
+        <input
+          id="code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          pattern="[0-9]*"
+          maxLength={6}
+          autoFocus
+          placeholder="123456"
+          value={code}
+          onChange={(e) =>
+            setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+          }
+          className={`${fieldClass} mt-7 text-center text-[24px] font-bold tracking-[0.4em]`}
+        />
         {errorLine}
-        <div className="flex flex-col gap-2 px-4">
+        <button
+          type="button"
+          onClick={() => sendCode()}
+          disabled={busy}
+          className="mt-4 min-h-[44px] text-[15px] font-semibold text-accent disabled:opacity-40"
+        >
+          Send a new code
+        </button>
+        <BottomBar>
           <Button type="submit" loading={busy} disabled={code.length !== 6}>
             Continue
           </Button>
-          <Button variant="plain" onClick={() => sendCode()} disabled={busy}>
-            Send a new code
-          </Button>
-        </div>
+        </BottomBar>
       </form>
     </main>
   );

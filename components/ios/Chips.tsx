@@ -4,20 +4,24 @@ import { useRef, type KeyboardEvent } from "react";
 
 type Option<T extends string> = { value: T; label: string };
 
-type SegmentedProps<T extends string> = {
+type ChipsProps<T extends string> = {
   options: readonly Option<T>[];
   /** null = nothing chosen yet (e.g. a required onboarding choice). */
   value: T | null;
   onChange: (value: T) => void;
   label: string;
+  /** One row that scrolls sideways (filters) instead of wrapping (forms). */
+  scroll?: boolean;
 };
 
-export function Segmented<T extends string>({
+/** Single-choice pill chips (a radio group). */
+export function Chips<T extends string>({
   options,
   value,
   onChange,
   label,
-}: SegmentedProps<T>) {
+  scroll,
+}: ChipsProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   function onKeyDown(e: KeyboardEvent, index: number) {
@@ -33,7 +37,7 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="flex h-9 w-full rounded-[9px] bg-track p-[2px]"
+      className={`flex gap-2 py-[3px] ${scroll ? "no-scrollbar -mx-5 overflow-x-auto px-5" : "flex-wrap"}`}
     >
       {options.map((opt, i) => {
         const selected = opt.value === value;
@@ -49,10 +53,10 @@ export function Segmented<T extends string>({
             tabIndex={selected || (value === null && i === 0) ? 0 : -1}
             onClick={() => onChange(opt.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className={`relative min-w-0 flex-1 truncate rounded-[8px] px-1 text-[13px] transition-[background-color,box-shadow] duration-150 after:absolute after:inset-x-0 after:-top-1 after:-bottom-1 after:content-[''] focus-visible:outline-2 focus-visible:outline-accent ${
+            className={`relative h-[38px] shrink-0 rounded-full px-4 text-[13px] whitespace-nowrap transition-colors duration-150 after:absolute after:inset-x-0 after:-inset-y-[3px] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
               selected
-                ? "bg-white font-semibold shadow-[0_3px_8px_rgb(0_0_0/0.12),0_3px_1px_rgb(0_0_0/0.04)]"
-                : "font-medium"
+                ? "bg-accent font-bold text-white"
+                : "bg-surface font-semibold text-label"
             }`}
           >
             {opt.label}

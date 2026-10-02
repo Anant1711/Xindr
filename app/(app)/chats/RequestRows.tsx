@@ -39,8 +39,11 @@ export function RequestCard({
   }
 
   return (
-    <div className="ios-row-divider hairline-b px-4 py-3.5">
-      <Link href={`/people/${personId}`} className="flex items-center gap-3">
+    <li className="flex flex-col gap-3.5 rounded-group bg-accent-tint p-4">
+      <Link
+        href={`/people/${personId}`}
+        className="flex items-center gap-3 rounded-xl"
+      >
         <Avatar
           id={personId}
           firstName={firstName}
@@ -48,31 +51,21 @@ export function RequestCard({
           size={44}
         />
         <div className="min-w-0">
-          <p className="truncate text-body font-semibold">
+          <p className="truncate font-display text-[16px] leading-[18px]">
             {displayName(firstName, lastInitial)}
           </p>
-          <p className="truncate text-sub text-secondary">
+          <p className="mt-0.5 truncate text-[13px] text-secondary">
             Wants to train · {slot}
           </p>
         </div>
       </Link>
       {note ? (
         // Plain text only; never rendered as HTML.
-        <p className="mt-2.5 rounded-[10px] bg-bg px-3 py-2 text-sub break-words whitespace-pre-wrap">
+        <p className="rounded-xl bg-white px-3 py-2 text-[14px] break-words whitespace-pre-wrap">
           {note}
         </p>
       ) : null}
-      <div className="mt-3 flex gap-3">
-        <Button
-          size="small"
-          variant="secondary"
-          className="flex-1"
-          disabled={pending}
-          loading={busy === "decline"}
-          onClick={() => respond(false)}
-        >
-          Decline
-        </Button>
+      <div className="flex gap-2.5">
         <Button
           size="small"
           className="flex-1"
@@ -82,8 +75,18 @@ export function RequestCard({
         >
           Accept
         </Button>
+        <Button
+          size="small"
+          variant="outline"
+          className="flex-1"
+          disabled={pending}
+          loading={busy === "decline"}
+          onClick={() => respond(false)}
+        >
+          Decline
+        </Button>
       </div>
-    </div>
+    </li>
   );
 }
 
@@ -98,31 +101,39 @@ export function WaitingRow({
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="flex items-center gap-3 pl-4">
-      <Link href={`/people/${personId}`} className="shrink-0">
-        <Avatar id={personId} firstName={firstName} lastInitial={lastInitial} />
-      </Link>
-      <div className="ios-row-divider hairline-b flex min-h-[60px] min-w-0 flex-1 items-center gap-2 py-2 pr-3">
-        <Link href={`/people/${personId}`} className="min-w-0 flex-1">
-          <p className="truncate text-body">
+    <li className="flex items-center gap-3 px-5 py-2.5">
+      <Link
+        href={`/people/${personId}`}
+        className="flex min-w-0 flex-1 items-center gap-3"
+      >
+        <Avatar
+          id={personId}
+          firstName={firstName}
+          lastInitial={lastInitial}
+          size={46}
+        />
+        <div className="min-w-0">
+          <p className="truncate font-display text-[15px] leading-[17px]">
             {displayName(firstName, lastInitial)}
           </p>
-          <p className="truncate text-sub text-secondary">{slot}</p>
-        </Link>
-        <Button
-          size="small"
-          variant="plain"
-          loading={pending}
-          onClick={() =>
-            startTransition(async () => {
-              const res = await cancelRequest(requestId, personId);
-              toast.show(res.ok ? "Request cancelled" : res.error);
-            })
-          }
-        >
-          Cancel
-        </Button>
-      </div>
-    </div>
+          <p className="mt-0.5 truncate text-[13.5px] text-secondary">
+            Waiting · {slot}
+          </p>
+        </div>
+      </Link>
+      <Button
+        size="small"
+        variant="plain"
+        loading={pending}
+        onClick={() =>
+          startTransition(async () => {
+            const res = await cancelRequest(requestId, personId);
+            toast.show(res.ok ? "Request cancelled" : res.error);
+          })
+        }
+      >
+        Cancel
+      </Button>
+    </li>
   );
 }

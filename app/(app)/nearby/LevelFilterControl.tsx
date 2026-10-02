@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Segmented } from "@/components/ios/Segmented";
+import { Chips } from "@/components/ios/Chips";
 import type { LevelFilter } from "@/lib/buddy";
 
 const OPTIONS = [
@@ -18,7 +18,8 @@ export function LevelFilterControl({ value }: { value: LevelFilter }) {
   const [, startTransition] = useTransition();
 
   return (
-    <Segmented
+    <Chips
+      scroll
       label="Level"
       options={OPTIONS}
       value={selected}

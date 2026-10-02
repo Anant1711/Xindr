@@ -25,7 +25,7 @@ export function Avatar({
   return (
     <span
       aria-hidden="true"
-      className="inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white select-none"
+      className="inline-flex shrink-0 items-center justify-center rounded-full font-display text-white select-none"
       style={{
         width: size,
         height: size,

@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { signOut } from "@/app/actions/auth";
+import { BottomBar } from "@/components/ios/BottomBar";
 import { Button } from "@/components/ios/Button";
-import { ChevronLeft } from "@/components/ios/icons";
-import { ListGroup } from "@/components/ios/ListGroup";
-import { NavBar, NavButton } from "@/components/ios/NavBar";
+import { ChevronLeft, ShieldIcon } from "@/components/ios/icons";
+import { IconButton, NavBar, NavButton } from "@/components/ios/NavBar";
 import { AboutYouFields } from "@/components/profile/AboutYouFields";
 import { PreferencesFields } from "@/components/profile/PreferencesFields";
 import type {
@@ -14,6 +14,7 @@ import type {
   Gym,
   PreferencesDraft,
 } from "@/components/profile/types";
+import { SAFETY_LINE } from "@/lib/constants";
 import { aboutYouSchema } from "@/lib/validation";
 import { createProfile, requestArea } from "./actions";
 
@@ -29,6 +30,17 @@ const EMPTY: AboutYouDraft = {
   focus: "",
 };
 
+function StepCount({ step }: { step: 1 | 2 }) {
+  return (
+    <span
+      className="text-sub font-bold text-secondary"
+      aria-label={`Step ${step} of 2`}
+    >
+      {step} / 2
+    </span>
+  );
+}
+
 export function Onboarding({ areas, gyms }: { areas: Area[]; gyms: Gym[] }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [about, setAbout] = useState<AboutYouDraft>(EMPTY);
@@ -42,12 +54,12 @@ export function Onboarding({ areas, gyms }: { areas: Area[]; gyms: Gym[] }) {
 
   const aboutParsed = aboutYouSchema.safeParse(about);
 
-  function updateAbout(next: AboutYouDraft) {
-    setAbout(next);
-    if (next.gender === "man" && prefs.womenOnlyVisibility) {
-      setPrefs({ ...prefs, womenOnlyVisibility: false });
-    }
-  }
+  // Men can never hide from men; the toggle is hidden and treated as off.
+  const effectivePrefs: PreferencesDraft = {
+    ...prefs,
+    womenOnlyVisibility:
+      about.gender === "man" ? false : prefs.womenOnlyVisibility,
+  };
 
   function getStarted() {
     if (!aboutParsed.success || !adult) return;
@@ -55,7 +67,7 @@ export function Onboarding({ areas, gyms }: { areas: Area[]; gyms: Gym[] }) {
     startTransition(async () => {
       const res = await createProfile({
         ...aboutParsed.data,
-        ...prefs,
+        ...effectivePrefs,
         confirmed18: true,
       });
       if (!res.ok) setError(res.error);
@@ -64,100 +76,94 @@ export function Onboarding({ areas, gyms }: { areas: Area[]; gyms: Gym[] }) {
 
   if (step === 1) {
     return (
-      <main className="pb-safe min-h-dvh pb-10">
+      <main className="min-h-dvh">
         <NavBar
-          modal
-          title="About You"
           left={<NavButton onClick={() => signOut()}>Sign out</NavButton>}
-          right={
-            <NavButton
-              bold
-              disabled={!aboutParsed.success}
-              onClick={() => setStep(2)}
-            >
-              Next
-            </NavButton>
-          }
+          right={<StepCount step={1} />}
         />
-        <p className="mx-8 mt-2 mb-5 text-sub text-secondary">
-          This is what people nearby will see. Only your first name and last
-          initial are shown.
-        </p>
+        <h1 className="px-5 pt-1 pb-6 font-display text-[32px] leading-[34px]">
+          About you
+        </h1>
         <AboutYouFields
           value={about}
-          onChange={updateAbout}
+          onChange={setAbout}
           areas={areas}
           gyms={gyms}
           onRequestArea={requestArea}
         />
-        <div className="px-4">
+        <BottomBar>
           <Button disabled={!aboutParsed.success} onClick={() => setStep(2)}>
-            Next
+            Continue
           </Button>
-        </div>
+        </BottomBar>
       </main>
     );
   }
 
   return (
-    <main className="pb-safe min-h-dvh pb-10">
+    <main className="min-h-dvh">
       <NavBar
-        modal
-        title="Preferences"
         left={
-          <NavButton onClick={() => setStep(1)}>
-            <ChevronLeft className="-ml-1" />
-            About You
-          </NavButton>
+          <IconButton label="Back to About you" onClick={() => setStep(1)}>
+            <ChevronLeft size={18} strokeWidth={2.2} />
+          </IconButton>
         }
+        right={<StepCount step={2} />}
       />
-      <div className="pt-4">
-        <PreferencesFields
-          value={prefs}
-          onChange={setPrefs}
-          gender={about.gender}
-        />
-      </div>
+      <h1 className="px-5 pt-1 pb-7 font-display text-[30px] leading-[32px]">
+        Who would
+        <br />
+        you like to meet?
+      </h1>
 
-      <ListGroup>
-        <label className="flex min-h-[44px] cursor-pointer items-start gap-3 px-4 py-3">
-          <input
-            type="checkbox"
-            checked={adult}
-            onChange={(e) => setAdult(e.target.checked)}
-            className="mt-0.5 size-[22px] shrink-0 accent-accent"
-          />
-          <span className="text-sub">
-            I&apos;m 18 or older and I agree to the{" "}
-            <a
-              href="/terms"
-              target="_blank"
-              rel="noopener"
-              className="text-accent"
-            >
-              Terms
-            </a>{" "}
-            and{" "}
-            <a
-              href="/privacy"
-              target="_blank"
-              rel="noopener"
-              className="text-accent"
-            >
-              Privacy Policy
-            </a>
-            .
-          </span>
-        </label>
-      </ListGroup>
+      <PreferencesFields
+        value={effectivePrefs}
+        onChange={setPrefs}
+        gender={about.gender}
+      />
+
+      <label className="mx-5 flex cursor-pointer items-start gap-3 rounded-[14px] py-2">
+        <input
+          type="checkbox"
+          checked={adult}
+          onChange={(e) => setAdult(e.target.checked)}
+          className="mt-0.5 size-[22px] shrink-0 accent-accent"
+        />
+        <span className="text-[14px] leading-5">
+          I&apos;m 18 or older and I agree to the{" "}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener"
+            className="font-semibold text-accent"
+          >
+            Terms
+          </a>{" "}
+          and{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener"
+            className="font-semibold text-accent"
+          >
+            Privacy Policy
+          </a>
+          .
+        </span>
+      </label>
+
+      <p className="mx-5 mt-4 flex items-start gap-2.5 text-sub text-secondary">
+        <ShieldIcon className="mt-px shrink-0" />
+        {SAFETY_LINE}
+      </p>
 
       {error ? (
-        <p role="alert" className="mx-8 -mt-6 mb-6 text-foot text-destructive">
+        <p role="alert" className="mx-5 mt-4 text-sub text-destructive">
           {error}
         </p>
       ) : null}
 
-      <div className="px-4">
+      <BottomBar>
         <Button
           onClick={getStarted}
           disabled={!adult || !aboutParsed.success}
@@ -165,10 +171,7 @@ export function Onboarding({ areas, gyms }: { areas: Area[]; gyms: Gym[] }) {
         >
           Get Started
         </Button>
-        <p className="mt-3 text-center text-foot text-secondary">
-          First sessions happen at the gym, in public.
-        </p>
-      </div>
+      </BottomBar>
     </main>
   );
 }

@@ -10,7 +10,7 @@ import { LargeTitle } from "@/components/ios/LargeTitle";
 import { ListGroup } from "@/components/ios/ListGroup";
 import { ListRow } from "@/components/ios/ListRow";
 import { BackButton, NavBar, NavButton } from "@/components/ios/NavBar";
-import { Segmented } from "@/components/ios/Segmented";
+import { Chips } from "@/components/ios/Chips";
 import { Sheet } from "@/components/ios/Sheet";
 import { SkeletonList } from "@/components/ios/Skeleton";
 import { StateMessage } from "@/components/ios/StateMessage";
@@ -67,7 +67,7 @@ export function Showcase() {
       <LargeTitle>Nearby</LargeTitle>
 
       <div className="px-4 pb-5">
-        <Segmented
+        <Chips
           label="Level"
           options={levels}
           value={level}
@@ -134,7 +134,7 @@ export function Showcase() {
           maxLength={1}
         />
         <div className="px-4 py-3">
-          <Segmented
+          <Chips
             label="Usually trains"
             options={[
               { value: "morning", label: "Morning" },

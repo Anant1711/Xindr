@@ -13,9 +13,13 @@ A mobile-first PWA that helps people find a gym buddy nearby. Platonic, hyperloc
 | 2     | Auth and onboarding             | Done        |
 | 3     | Nearby and buddy profile        | Done        |
 | 4     | Ask to Train and requests       | Done        |
-| 5     | Chat                            | Not started |
+| 5     | Chat                            | Done        |
 | 6     | Safety and account              | Not started |
 | 7     | PWA, polish, deploy             | Not started |
+
+## Design
+
+The UI follows the "Gym Buddy App – iOS UI" design canvas: white surfaces, indigo accent `#3652FF`, Archivo Black display type over Inter body, pill chips and buttons, bordered cards. Tokens live in `app/globals.css` (`@theme`); fonts are self-hosted with `next/font`. Where the canvas and the spec differ, the spec wins: no fake status bar, an explicit 18+ checkbox, a darker overlap green for contrast, and no filter button without a feature behind it.
 
 ## Requirements
 

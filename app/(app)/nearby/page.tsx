@@ -15,14 +15,14 @@ export default async function NearbyPage(props: PageProps<"/nearby">) {
     <div className="pt-safe">
       <RefreshOnFocus />
       <LargeTitle>Nearby</LargeTitle>
-      <div className="px-4 pb-5">
+      <div className="px-5 pt-3 pb-5">
         <LevelFilterControl value={level} />
       </div>
       <Suspense
         key={level}
         fallback={
           <section className="mb-8">
-            <div className="mx-8 mb-1.5 h-[18px]" />
+            <div className="mx-5 mb-2 h-4" />
             <SkeletonList rows={6} />
           </section>
         }

@@ -8,8 +8,8 @@ export function LargeTitle({
   trailing?: ReactNode;
 }) {
   return (
-    <div className="flex items-end justify-between px-4 pt-2 pb-2">
-      <h1 className="text-large-title">{children}</h1>
+    <div className="flex items-center justify-between px-5 pt-3 pb-1">
+      <h1 className="font-display text-large-title">{children}</h1>
       {trailing}
     </div>
   );

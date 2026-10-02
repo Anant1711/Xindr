@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Button } from "@/components/ios/Button";
+import { BottomBar } from "@/components/ios/BottomBar";
+import { Button, buttonClass } from "@/components/ios/Button";
 import { useToast } from "@/components/ios/Toast";
 import { SAFETY_LINE } from "@/lib/constants";
 import type { Relationship } from "@/lib/relationship";
@@ -16,8 +17,7 @@ type Props = {
   slot: string | null;
 };
 
-const linkButton =
-  "inline-flex h-[50px] w-full items-center justify-center rounded-button bg-accent text-body font-semibold text-white active:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+const linkButton = buttonClass();
 
 export function BuddyActions({
   personId,
@@ -90,21 +90,6 @@ export function BuddyActions({
           </p>
           <div className="flex gap-3">
             <Button
-              variant="secondary"
-              loading={pending && busy === "decline"}
-              disabled={pending}
-              onClick={() =>
-                run(
-                  "decline",
-                  () =>
-                    respondToRequest(relationship.requestId, false, personId),
-                  "Request declined",
-                )
-              }
-            >
-              Decline
-            </Button>
-            <Button
               loading={pending && busy === "accept"}
               disabled={pending}
               onClick={() =>
@@ -117,6 +102,21 @@ export function BuddyActions({
               }
             >
               Accept
+            </Button>
+            <Button
+              variant="outline"
+              loading={pending && busy === "decline"}
+              disabled={pending}
+              onClick={() =>
+                run(
+                  "decline",
+                  () =>
+                    respondToRequest(relationship.requestId, false, personId),
+                  "Request declined",
+                )
+              }
+            >
+              Decline
             </Button>
           </div>
         </>
@@ -131,9 +131,9 @@ export function BuddyActions({
   }
 
   return (
-    <div className="flex flex-col gap-3 px-4 pb-6">
-      {body}
-      <p className="text-center text-foot text-secondary">{SAFETY_LINE}</p>
-    </div>
+    <>
+      <p className="mx-5 text-center text-sub text-secondary">{SAFETY_LINE}</p>
+      <BottomBar>{body}</BottomBar>
+    </>
   );
 }

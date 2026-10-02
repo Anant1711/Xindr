@@ -29,7 +29,7 @@ export function SkeletonList({
     <div
       role="status"
       aria-label="Loading"
-      className="ios-group mx-4 overflow-hidden rounded-group bg-card"
+      className="ios-group mx-5 overflow-hidden rounded-group border border-separator bg-card"
     >
       {Array.from({ length: rows }, (_, i) => (
         <SkeletonRow key={i} tall={tall} />

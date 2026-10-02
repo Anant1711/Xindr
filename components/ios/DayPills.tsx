@@ -27,8 +27,8 @@ export function DayPills({
     >
       {DAY_SHORT.map((name, i) => {
         const active = days.includes(i);
-        const cls = `flex size-10 items-center justify-center rounded-full text-sub font-semibold transition-colors ${
-          active ? on : "bg-bg text-secondary"
+        const cls = `flex size-[38px] items-center justify-center rounded-full text-[12px] font-bold transition-colors ${
+          active ? on : "bg-surface text-secondary"
         }`;
         if (onToggle) {
           return (

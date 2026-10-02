@@ -1,7 +1,7 @@
+import Link from "next/link";
 import { Avatar } from "@/components/ios/Avatar";
 import { LargeTitle } from "@/components/ios/LargeTitle";
-import { ListGroup } from "@/components/ios/ListGroup";
-import { ListRow } from "@/components/ios/ListRow";
+import { SectionLabel } from "@/components/ios/ListGroup";
 import { StateMessage } from "@/components/ios/StateMessage";
 import { requireProfile } from "@/lib/auth";
 import { getChatsOverview } from "@/lib/chats";
@@ -35,73 +35,104 @@ export default async function ChatsPage() {
       ) : null}
 
       {incoming.length > 0 ? (
-        <ListGroup
-          header={incoming.length > 1 ? "New requests" : "New request"}
-        >
-          {incoming.map((r) => (
-            <RequestCard
-              key={r.id}
-              requestId={r.id}
-              personId={r.person.id}
-              firstName={r.person.first_name}
-              lastInitial={r.person.last_initial}
-              slot={slotLabel(new Date(r.proposed_at), now)}
-              note={r.note}
-            />
-          ))}
-        </ListGroup>
+        <section className="mt-4 mb-6">
+          <SectionLabel>
+            {incoming.length > 1 ? "New requests" : "New request"}
+          </SectionLabel>
+          <ul className="flex flex-col gap-2.5 px-5">
+            {incoming.map((r) => (
+              <RequestCard
+                key={r.id}
+                requestId={r.id}
+                personId={r.person.id}
+                firstName={r.person.first_name}
+                lastInitial={r.person.last_initial}
+                slot={slotLabel(new Date(r.proposed_at), now)}
+                note={r.note}
+              />
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       {outgoing.length > 0 ? (
-        <ListGroup header="Waiting">
-          {outgoing.map((r) => (
-            <WaitingRow
-              key={r.id}
-              requestId={r.id}
-              personId={r.person.id}
-              firstName={r.person.first_name}
-              lastInitial={r.person.last_initial}
-              slot={slotLabel(new Date(r.proposed_at), now)}
-            />
-          ))}
-        </ListGroup>
+        <section className="mt-4 mb-4">
+          <SectionLabel>Waiting</SectionLabel>
+          <ul>
+            {outgoing.map((r) => (
+              <WaitingRow
+                key={r.id}
+                requestId={r.id}
+                personId={r.person.id}
+                firstName={r.person.first_name}
+                lastInitial={r.person.last_initial}
+                slot={slotLabel(new Date(r.proposed_at), now)}
+              />
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       {conversations.length > 0 ? (
-        <ListGroup header="Messages">
-          {conversations.map((c) => {
-            const unread = Number(c.unread_count) > 0;
-            return (
-              <ListRow
-                key={c.match_id}
-                tall
-                chevron
-                href={`/chats/${c.match_id}`}
-                bold={unread && !c.ended}
-                dimmed={c.ended}
-                leading={
-                  <Avatar
-                    id={c.other_id}
-                    firstName={c.other_first_name}
-                    lastInitial={c.other_last_initial}
-                  />
-                }
-                title={displayName(c.other_first_name, c.other_last_initial)}
-                subtitle={
-                  c.ended
-                    ? "Ended"
-                    : (c.last_body ?? "Say hello and confirm the plan")
-                }
-                detail={relativeTime(new Date(c.last_at), now)}
-                ariaLabel={
-                  unread && !c.ended
-                    ? `${displayName(c.other_first_name, c.other_last_initial)}, ${c.unread_count} unread`
-                    : undefined
-                }
-              />
-            );
-          })}
-        </ListGroup>
+        <section className="mt-4 mb-4">
+          <SectionLabel>Messages</SectionLabel>
+          <ul>
+            {conversations.map((c) => {
+              const unread = Number(c.unread_count) > 0 && !c.ended;
+              const name = displayName(
+                c.other_first_name,
+                c.other_last_initial,
+              );
+              return (
+                <li key={c.match_id}>
+                  <Link
+                    href={`/chats/${c.match_id}`}
+                    aria-label={
+                      unread ? `${name}, ${c.unread_count} unread` : undefined
+                    }
+                    className={`flex items-center gap-3 px-5 py-3 focus-visible:bg-surface focus-visible:outline-none active:bg-surface ${
+                      c.ended ? "opacity-55" : ""
+                    }`}
+                  >
+                    <Avatar
+                      id={c.other_id}
+                      firstName={c.other_first_name}
+                      lastInitial={c.other_last_initial}
+                      size={46}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="truncate font-display text-[15px] leading-[17px]">
+                          {name}
+                        </p>
+                        <span className="shrink-0 text-foot text-secondary">
+                          {relativeTime(new Date(c.last_at), now)}
+                        </span>
+                      </div>
+                      <p
+                        className={`mt-0.5 truncate text-[13.5px] ${
+                          unread
+                            ? "font-bold text-label"
+                            : "font-medium text-secondary"
+                        }`}
+                      >
+                        {c.ended
+                          ? "Ended"
+                          : (c.last_body ?? "Say hello and confirm the plan")}
+                      </p>
+                    </div>
+                    {unread ? (
+                      <span
+                        aria-hidden="true"
+                        className="size-[9px] shrink-0 rounded-full bg-accent"
+                      />
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ) : null}
     </div>
   );

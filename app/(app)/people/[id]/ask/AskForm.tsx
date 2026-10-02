@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { sendRequest } from "@/app/actions/requests";
-import { ListGroup } from "@/components/ios/ListGroup";
-import { ListRow } from "@/components/ios/ListRow";
+import { BottomBar } from "@/components/ios/BottomBar";
+import { Button } from "@/components/ios/Button";
+import { Checkmark } from "@/components/ios/icons";
+import { SectionLabel } from "@/components/ios/ListGroup";
 import { NavBar, NavButton } from "@/components/ios/NavBar";
-import { TextAreaRow } from "@/components/ios/TextField";
 import { useToast } from "@/components/ios/Toast";
 import { LIMITS, SAFETY_LINE } from "@/lib/constants";
 
@@ -61,69 +62,97 @@ export function AskForm({ personId, name, overlap, slots }: Props) {
   }
 
   return (
-    <div className="pb-safe min-h-dvh pb-10">
+    <div className="min-h-dvh">
       <NavBar
-        modal
         title="Ask to Train"
         left={<NavButton href={profileHref}>Cancel</NavButton>}
-        right={
-          <NavButton bold disabled={!choice || pending} onClick={send}>
-            Send
-          </NavButton>
-        }
       />
 
-      <p className="mx-8 mt-2 mb-5 text-sub text-secondary">
-        Suggest a time to train with {name}
-      </p>
+      <div className="px-5 pt-2.5">
+        <h1 className="font-display text-[28px] leading-[30px]">Pick a time</h1>
+        <p className="mt-1.5 text-[14px] text-secondary">
+          {overlap
+            ? `Suggested from times you and ${name} both train.`
+            : `Your usual days don't overlap yet. These are ${name}'s usual days.`}
+        </p>
+      </div>
 
-      <ListGroup
-        header="Suggested times"
-        footer={
-          overlap
-            ? undefined
-            : "Your usual days don't overlap yet. These are their usual days."
-        }
+      <div
+        role="radiogroup"
+        aria-label="Suggested times"
+        className="flex flex-col gap-2.5 px-5 pt-5"
       >
-        {slots.map((s) => (
-          <ListRow
-            key={s.iso}
-            title={s.label}
-            selected={s.iso === choice}
-            role="radio"
-            ariaChecked={s.iso === choice}
-            onClick={() => setSelected(s.iso)}
-          />
-        ))}
-      </ListGroup>
+        {slots.map((s) => {
+          const on = s.iso === choice;
+          return (
+            <button
+              key={s.iso}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => setSelected(s.iso)}
+              className={`flex min-h-[56px] items-center justify-between rounded-2xl border-[1.5px] px-4 py-3.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                on
+                  ? "border-accent bg-accent-tint"
+                  : "border-separator bg-white"
+              }`}
+            >
+              <span className="text-[15px] font-bold">{s.label}</span>
+              <span
+                aria-hidden="true"
+                className={`flex size-[26px] shrink-0 items-center justify-center rounded-full ${
+                  on
+                    ? "bg-accent text-white"
+                    : "border-[1.5px] border-separator"
+                }`}
+              >
+                {on ? <Checkmark size={14} strokeWidth={3} /> : null}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-      <ListGroup header="Note (optional)">
-        <TextAreaRow
-          id="ask-note"
-          label="Note"
-          placeholder="e.g. I'm working on squats, happy to spot"
-          maxLength={LIMITS.note}
-          count={note.length}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-        />
-      </ListGroup>
+      <section className="pt-6">
+        <SectionLabel>
+          <label htmlFor="ask-note">Note (optional)</label>
+        </SectionLabel>
+        <div className="mx-5 rounded-[14px] bg-surface px-4 pt-3.5 pb-2 focus-within:ring-2 focus-within:ring-accent">
+          <textarea
+            id="ask-note"
+            rows={3}
+            maxLength={LIMITS.note}
+            placeholder="Hi, I train around the same time."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="w-full resize-none bg-transparent text-[15px] outline-none placeholder:text-secondary"
+          />
+          <p className="text-right text-foot text-secondary" aria-live="polite">
+            {note.length}/{LIMITS.note}
+          </p>
+        </div>
+      </section>
 
       {error ? (
-        <div
-          role="alert"
-          className="mx-8 -mt-6 mb-6 text-foot text-destructive"
-        >
+        <p role="alert" className="mx-5 mt-4 text-sub text-destructive">
           {error.text}{" "}
           {error.openChats ? (
-            <Link href="/chats" className="text-accent underline">
+            <Link href="/chats" className="font-semibold text-accent underline">
               Open Chats
             </Link>
           ) : null}
-        </div>
+        </p>
       ) : null}
 
-      <p className="mx-8 text-center text-foot text-secondary">{SAFETY_LINE}</p>
+      <p className="mx-5 mt-4 text-[12.5px] leading-[18px] text-secondary">
+        {SAFETY_LINE}
+      </p>
+
+      <BottomBar>
+        <Button onClick={send} disabled={!choice} loading={pending}>
+          Send Request
+        </Button>
+      </BottomBar>
     </div>
   );
 }
