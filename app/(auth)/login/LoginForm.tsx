@@ -46,7 +46,11 @@ export function LoginForm({
     setBusy(true);
     const { error: err } = await createClient().auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        // Always show Google's account chooser, so signing out and back in can pick another account.
+        queryParams: { prompt: "select_account" },
+      },
     });
     if (err) {
       setBusy(false);
