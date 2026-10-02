@@ -6,16 +6,16 @@ A mobile-first PWA that helps people find a gym buddy nearby. Platonic, hyperloc
 
 ## Status
 
-| Phase | Scope                           | State       |
-| ----- | ------------------------------- | ----------- |
-| 0     | Scaffold, iOS component kit, CI | Done        |
-| 1     | Database, RLS tests, dev seed   | Done        |
-| 2     | Auth and onboarding             | Done        |
-| 3     | Nearby and buddy profile        | Done        |
-| 4     | Ask to Train and requests       | Done        |
-| 5     | Chat                            | Done        |
-| 6     | Safety and account              | Done        |
-| 7     | PWA, polish, deploy             | Not started |
+| Phase | Scope                           | State                     |
+| ----- | ------------------------------- | ------------------------- |
+| 0     | Scaffold, iOS component kit, CI | Done                      |
+| 1     | Database, RLS tests, dev seed   | Done                      |
+| 2     | Auth and onboarding             | Done                      |
+| 3     | Nearby and buddy profile        | Done                      |
+| 4     | Ask to Train and requests       | Done                      |
+| 5     | Chat                            | Done                      |
+| 6     | Safety and account              | Done                      |
+| 7     | PWA, polish, deploy             | Done (deploy steps below) |
 
 ## Design
 
@@ -89,7 +89,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck, lint, format check and unit test
 ## Project layout
 
 ```
-app/                  routes (App Router)
+app/                  routes (App Router), manifest.ts, icons
 app/dev/components/   dev-only component showcase
 components/ios/       iOS-style component kit (no third-party UI kit)
 components/profile/   profile fields shared by onboarding and the Profile tab
@@ -123,6 +123,55 @@ Run with two browsers (one normal, one private) signed in as different users. Lo
 10. Send feedback; "My area isn't listed" during onboarding.
 11. Delete account: confirm, land on login with the confirmation; check in Supabase Studio that the user's rows are gone.
 12. Repeat the core flow on a real iPhone in Safari and as an installed PWA (Phase 7).
+
+## Deploy (Supabase + Vercel)
+
+Never paste secret keys into chat, issues or commits. They go only into the Supabase and Vercel dashboards (and your local `.env.local`).
+
+### 1. Supabase project
+
+1. Create a project at supabase.com (region close to India, e.g. Mumbai). Keep the **database password** somewhere safe.
+2. In a terminal in this repo:
+   ```bash
+   pnpm exec supabase login                          # opens the browser once
+   pnpm exec supabase link --project-ref <your-ref>  # asks for the database password
+   pnpm exec supabase db push                        # applies supabase/migrations/*
+   ```
+   `<your-ref>` is the part of the project URL before `.supabase.co`.
+3. Dashboard > **Authentication > URL Configuration**: Site URL = your Vercel URL (e.g. `https://xindr.vercel.app`). Redirect URLs: `https://<your-vercel-domain>/auth/callback` and `http://localhost:3000/auth/callback`.
+4. Dashboard > **Authentication > Emails > Templates**: paste `supabase/templates/code.html` into **Magic Link** and **Confirm signup** (subject: "Your Gym Buddy sign-in code"). The template must contain `{{ .Token }}`.
+5. Email sending: the built-in sender allows only a few emails per hour. Before inviting real users, set **Authentication > Emails > SMTP** to Resend or Brevo. Until then, prefer Google sign-in for testers.
+6. Data: add real gyms in **Table Editor > gyms** (never invented names) and check the coordinates in **areas** on a map.
+7. Optional but recommended: **Database > Extensions** enable `pg_cron`, then in the SQL editor:
+   ```sql
+   select cron.schedule('expire-requests', '*/30 * * * *', 'select public.expire_stale_requests()');
+   ```
+
+### 2. Google sign-in
+
+1. Google Cloud Console > APIs & Services > Credentials > **Create OAuth client ID** (Web application).
+2. Authorised redirect URI: `https://<your-ref>.supabase.co/auth/v1/callback`.
+3. Supabase dashboard > **Authentication > Sign In / Providers > Google**: enable, paste the **Client ID** and **Client secret**, save. Nothing goes into this repo.
+4. Locally (optional): put `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` in `supabase/.env` (gitignored), set `enabled = true` under `[auth.external.google]` in `supabase/config.toml`, and add `http://127.0.0.1:54321/auth/v1/callback` to the Google client.
+
+### 3. Vercel
+
+1. vercel.com > **Add New > Project** > import the GitHub repo `Anant1711/Xindr`. Framework: Next.js (detected). Install command: `pnpm install`.
+2. **Environment variables** (Production), from Supabase > Project Settings > API:
+   | Name                            | Value                                           |
+   | ------------------------------- | ----------------------------------------------- |
+   | `NEXT_PUBLIC_SUPABASE_URL`      | `https://<your-ref>.supabase.co`                |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | the **anon / publishable** key                  |
+   | `SUPABASE_SERVICE_ROLE_KEY`     | the **service_role / secret** key (server only) |
+   | `NEXT_PUBLIC_APP_URL`           | `https://<your-vercel-domain>`                  |
+3. Deploy. Then set the Supabase Site URL and redirect URLs (step 1.3) to the final domain if it changed, and redeploy if you changed `NEXT_PUBLIC_*` values (they are baked in at build time).
+4. Preview deployments: point them at a **separate** dev Supabase project (set the Preview environment variables to that project), never production.
+
+### 4. Check
+
+- Open the Vercel URL on an iPhone in Safari: sign in, onboard, and add it to the Home Screen (Share > Add to Home Screen). It opens full-screen with the app icon.
+- Run the manual QA checklist above with two people.
+- Supabase free projects pause after about a week without traffic: keep it active or upgrade before a real launch.
 
 ## Notes
 
