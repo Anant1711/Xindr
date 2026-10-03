@@ -10,7 +10,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data:",
+  // Profile photos come from Supabase Storage via signed URLs.
+  `img-src 'self' blob: data: ${supabaseUrl}`,
   "font-src 'self'",
   `connect-src 'self' ${supabaseUrl} ${supabaseWs}`,
   "object-src 'none'",

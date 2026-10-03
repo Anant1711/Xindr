@@ -137,6 +137,25 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"profile_photos": {
+                  Row: {
+                    "created_at": string,"height": number | null,"id": string,"path": string,"position": number,"user_id": string,"width": number | null
+                  }
+                  Insert: {
+                    "created_at"?: string,"height"?: number | null,"id"?: string,"path": string,"position": number,"user_id": string,"width"?: number | null
+                  }
+                  Update: {
+                    "created_at"?: string,"height"?: number | null,"id"?: string,"path"?: string,"position"?: number,"user_id"?: string,"width"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "profile_photos_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "area_id": number,"avatar_url": string | null,"confirmed_18_at": string,"created_at": string,"first_name": string,"focus": string | null,"gender": Database["public"]['Enums']["gender_t"],"gym_id": string | null,"id": string,"is_active": boolean,"last_initial": string,"last_name": string | null,"level": Database["public"]['Enums']["level_t"],"show_me": Database["public"]['Enums']["show_me_t"],"time_of_day": Database["public"]['Enums']["time_of_day_t"],"training_days": (number)[],"updated_at": string,"women_only_visibility": boolean
@@ -224,6 +243,9 @@ isOneToOne: false
 "can_see":
 { Args: { "target": string,"viewer": string }; Returns: boolean
                            },
+"can_view_media":
+{ Args: { "p_owner": string }; Returns: boolean
+                           },
 "cancel_request":
 { Args: { "p_request": string }; Returns: undefined
                            },
@@ -246,6 +268,14 @@ isOneToOne: false
       } },
 "is_blocked":
 { Args: { "a": string,"b": string }; Returns: boolean
+                           },
+"main_photos":
+{ Args: { "p_ids": (string)[] }; Returns: {
+              "path": string,"user_id": string
+            }[]
+                           },
+"make_main_photo":
+{ Args: { "p_photo": string }; Returns: undefined
                            },
 "mark_messages_read":
 { Args: { "p_match": string }; Returns: undefined
@@ -273,6 +303,17 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"profile_photos_of":
+{ Args: { "p_id": string }; Returns: {
+              "height": number,"path": string,"position": number,"width": number
+            }[]
+                           },
+"purge_old_messages":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"remove_photo":
+{ Args: { "p_photo": string }; Returns: string
+                           },
 "respond_to_request":
 { Args: { "p_accept": boolean,"p_request": string }; Returns: string
                            },
@@ -287,7 +328,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "gender_t": "woman"|"man"|"other","level_t": "beginner"|"intermediate"|"pro","report_reason_t": "harassment"|"fake_profile"|"inappropriate_message"|"unsafe_behavior"|"other","request_status_t": "pending"|"accepted"|"declined"|"cancelled"|"expired","show_me_t": "women"|"men"|"anyone","time_of_day_t": "morning"|"evening"
+            "gender_t": "woman"|"man"|"other","level_t": "beginner"|"intermediate"|"pro","report_reason_t": "harassment"|"fake_profile"|"inappropriate_message"|"unsafe_behavior"|"other"|"inappropriate_photo","request_status_t": "pending"|"accepted"|"declined"|"cancelled"|"expired","show_me_t": "women"|"men"|"anyone","time_of_day_t": "morning"|"evening"
           }
           CompositeTypes: {
             "buddy_card": {
@@ -405,7 +446,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "gender_t": ["woman", "man", "other"],"level_t": ["beginner", "intermediate", "pro"],"report_reason_t": ["harassment", "fake_profile", "inappropriate_message", "unsafe_behavior", "other"],"request_status_t": ["pending", "accepted", "declined", "cancelled", "expired"],"show_me_t": ["women", "men", "anyone"],"time_of_day_t": ["morning", "evening"]
+            "gender_t": ["woman", "man", "other"],"level_t": ["beginner", "intermediate", "pro"],"report_reason_t": ["harassment", "fake_profile", "inappropriate_message", "unsafe_behavior", "other", "inappropriate_photo"],"request_status_t": ["pending", "accepted", "declined", "cancelled", "expired"],"show_me_t": ["women", "men", "anyone"],"time_of_day_t": ["morning", "evening"]
           }
         }
 } as const

@@ -7,6 +7,8 @@ import { ListRow } from "@/components/ios/ListRow";
 import { requireProfile } from "@/lib/auth";
 import { levelLabel } from "@/lib/format";
 import { nameFor } from "@/lib/names";
+import { signedPhotoUrls } from "@/lib/photos/server";
+import { PhotosSection } from "./PhotosSection";
 import {
   DeleteAccountRow,
   FeedbackRow,
@@ -20,7 +22,7 @@ const SHOW_ME_LABEL = { women: "Women", men: "Men", anyone: "Anyone" } as const;
 
 export default async function ProfilePage() {
   const { supabase, userId } = await requireProfile();
-  const [{ data: me }, blocked, lastName] = await Promise.all([
+  const [{ data: me }, blocked, lastName, ownPhotos] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -30,9 +32,24 @@ export default async function ProfilePage() {
       .single(),
     supabase.rpc("my_blocked_people"),
     supabase.rpc("visible_last_name", { p_id: userId }),
+    supabase
+      .from("profile_photos")
+      .select("id, path, position")
+      .eq("user_id", userId)
+      .order("position"),
   ]);
   if (!me) throw new Error("Could not load profile");
   const blockedCount = blocked.data?.length ?? 0;
+  const rows = ownPhotos.data ?? [];
+  const urls = await signedPhotoUrls(
+    supabase,
+    rows.map((r) => r.path),
+  );
+  const photos = rows.map((r) => ({
+    id: r.id,
+    position: r.position,
+    url: urls.get(r.path) ?? null,
+  }));
 
   return (
     <div className="pt-safe">
@@ -44,6 +61,7 @@ export default async function ProfilePage() {
           firstName={me.first_name}
           lastInitial={me.last_initial}
           size={60}
+          src={photos[0]?.url}
         />
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-[20px] leading-[22px]">
@@ -60,6 +78,8 @@ export default async function ProfilePage() {
           Edit
         </Link>
       </div>
+
+      <PhotosSection userId={userId} photos={photos} />
 
       <ListGroup header="Your profile">
         <ListRow title="My details" chevron href="/profile/details" />

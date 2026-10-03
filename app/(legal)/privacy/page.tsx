@@ -16,15 +16,24 @@ export default function PrivacyPage() {
           with it, editable), gender, level, area, gym, usual training time and
           days, and an optional focus.
         </li>
-        <li>Your requests, messages, reports and blocks.</li>
+        <li>
+          Up to 4 profile photos, if you add them. We re-encode them on your
+          device first, which removes location (GPS) and other hidden data.
+        </li>
+        <li>
+          Your requests, messages, reports and blocks. Messages are deleted
+          after 7 days.
+        </li>
       </ul>
       <h2>What others see</h2>
       <p>
         People nearby see your first name and last initial, gender, level, area,
         gym, training times and days, focus, and an approximate distance between
-        areas. Your full last name is shown only to people you&apos;ve matched
-        with (and hidden again if either of you blocks the other). Never your
-        email or exact location.
+        areas, and your photos. Photos follow the same rules as your profile:
+        hidden from men if you choose, hidden while paused, and never shown to
+        people you block. Your full last name is shown only to people
+        you&apos;ve matched with (and hidden again if either of you blocks the
+        other). Never your email or exact location.
       </p>
       <h2>Your controls</h2>
       <ul>

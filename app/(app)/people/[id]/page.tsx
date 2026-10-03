@@ -13,9 +13,11 @@ import {
   timeOfDayLabel,
 } from "@/lib/format";
 import { nameFor } from "@/lib/names";
+import { signedPhotoUrls } from "@/lib/photos/server";
 import { getRelationship } from "@/lib/relationship";
 import { BuddyActions } from "./BuddyActions";
 import { BuddyNav } from "./BuddyNav";
+import { PhotoGallery } from "./PhotoGallery";
 
 export const metadata = { title: "Profile" };
 
@@ -39,6 +41,17 @@ export default async function BuddyPage(props: PageProps<"/people/[id]">) {
       ? (await supabase.rpc("visible_last_name", { p_id: id })).data
       : null;
   const name = nameFor(person.first_name, person.last_initial, lastName);
+  const { data: photoRows } = await supabase.rpc("profile_photos_of", {
+    p_id: id,
+  });
+  const photoUrls = await signedPhotoUrls(
+    supabase,
+    (photoRows ?? []).map((r) => r.path),
+  );
+  const photos = (photoRows ?? []).flatMap((r) => {
+    const url = photoUrls.get(r.path);
+    return url ? [{ url, width: r.width, height: r.height }] : [];
+  });
   const distance = distanceLabel(person);
   const shared = person.shared_days.length;
   const when = person.time_of_day === "morning" ? "mornings" : "evenings";
@@ -50,12 +63,16 @@ export default async function BuddyPage(props: PageProps<"/people/[id]">) {
       <BuddyNav personId={person.id} name={name} />
 
       <div className="flex flex-col items-center gap-3.5 px-5 pt-2.5 pb-6 text-center">
-        <Avatar
-          id={person.id}
-          firstName={person.first_name}
-          lastInitial={person.last_initial}
-          size={88}
-        />
+        {photos.length > 0 ? (
+          <PhotoGallery photos={photos} name={name} />
+        ) : (
+          <Avatar
+            id={person.id}
+            firstName={person.first_name}
+            lastInitial={person.last_initial}
+            size={88}
+          />
+        )}
         <div className="flex flex-col items-center gap-2">
           <h1 className="font-display text-[26px] leading-[28px]">{name}</h1>
           <ul

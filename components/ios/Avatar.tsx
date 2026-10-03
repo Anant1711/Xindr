@@ -13,6 +13,8 @@ type AvatarProps = {
   firstName: string;
   lastInitial?: string;
   size?: number;
+  /** Signed URL of the person's main photo; initials are shown when absent. */
+  src?: string | null;
 };
 
 export function Avatar({
@@ -20,8 +22,26 @@ export function Avatar({
   firstName,
   lastInitial = "",
   size = 40,
+  src,
 }: AvatarProps) {
   const initials = (firstName.charAt(0) + lastInitial.charAt(0)).toUpperCase();
+  if (src) {
+    return (
+      // Plain <img>: the photo is already resized on upload, and signed URLs change hourly,
+      // which would defeat the image optimizer's cache.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        className="shrink-0 rounded-full object-cover"
+        style={{ width: size, height: size, backgroundColor: avatarColor(id) }}
+      />
+    );
+  }
   return (
     <span
       aria-hidden="true"

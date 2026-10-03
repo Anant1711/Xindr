@@ -11,6 +11,7 @@ import {
   type LevelFilter,
 } from "@/lib/buddy";
 import { displayName, levelLabel } from "@/lib/format";
+import { signedPhotoUrls } from "@/lib/photos/server";
 
 /** Card subtitle: the gym badge carries "Same gym", so here it is area or km. */
 function distanceText(p: BuddyCard) {
@@ -48,6 +49,16 @@ export async function NearbyList({ level }: { level: LevelFilter }) {
   }
 
   const people = buddyCardsSchema.parse(nearby.data);
+  const { data: covers } = people.length
+    ? await supabase.rpc("main_photos", { p_ids: people.map((p) => p.id) })
+    : { data: [] };
+  const urls = await signedPhotoUrls(
+    supabase,
+    (covers ?? []).map((c) => c.path),
+  );
+  const photoOf = new Map(
+    (covers ?? []).map((c) => [c.user_id, urls.get(c.path) ?? null]),
+  );
 
   if (people.length === 0) {
     return (
@@ -83,6 +94,7 @@ export async function NearbyList({ level }: { level: LevelFilter }) {
                   firstName={p.first_name}
                   lastInitial={p.last_initial}
                   size={52}
+                  src={photoOf.get(p.id)}
                 />
                 <div className="flex min-w-0 flex-col gap-1">
                   <div className="flex items-center gap-2">

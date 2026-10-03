@@ -17,6 +17,7 @@ const REASON_LABEL: Record<Reason, string> = {
   harassment: "Harassment",
   fake_profile: "Fake profile",
   inappropriate_message: "Inappropriate messages",
+  inappropriate_photo: "Inappropriate photo",
   unsafe_behavior: "Unsafe behaviour",
   other: "Something else",
 };

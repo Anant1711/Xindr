@@ -61,6 +61,7 @@ export const REPORT_REASONS = [
   "harassment",
   "fake_profile",
   "inappropriate_message",
+  "inappropriate_photo",
   "unsafe_behavior",
   "other",
 ] as const;

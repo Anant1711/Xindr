@@ -45,7 +45,7 @@ In development, the component kit is at <http://localhost:3000/dev/components> (
 ## Database
 
 - Schema: `supabase/migrations/0001_init.sql` (applied verbatim from the spec). Change it only by adding a new migration.
-- `0002_blocked_people.sql` adds `my_blocked_people()`, so the Profile tab can list people you blocked (RLS hides a blocked person's profile row by design). `0003_last_name.sql` adds the full last name, readable only by you and by people you're matched with (column-level privilege + `visible_last_name()` / `my_match_last_names()`). The spec's optional Phase 8 migration becomes `0004_checkins.sql`.
+- `0002_blocked_people.sql` adds `my_blocked_people()`, so the Profile tab can list people you blocked (RLS hides a blocked person's profile row by design). `0003_last_name.sql` adds the full last name, readable only by you and by people you're matched with (column-level privilege + `visible_last_name()` / `my_match_last_names()`). `0004_message_retention.sql` keeps messages for 7 days (hourly pg_cron purge), schedules request expiry, and stamps server time on every message. `0005_profile_photos.sql` adds up to 4 profile photos in a private `profile-photos` bucket, visible under the same rules as the profile. The spec's optional Phase 8 migration becomes `0006_checkins.sql`.
 - Tests: `pnpm db:test` runs the pgTAP suite in `supabase/tests/` (visibility, RLS, RPC rules, messaging, blocking).
 - Types: after a schema change run `pnpm db:types` to regenerate `lib/database.types.ts`.
 - Reset: `pnpm db:reset` re-applies migrations to an empty local database (re-run the seed after).
@@ -100,6 +100,9 @@ docs/BUILD_SPEC.md    the spec
 ```
 
 ## Security
+
+- Photos: re-encoded in the browser before upload (strips EXIF/GPS, max 1080px, ~200 KB JPEG); private bucket, JPEG only, 1 MB cap; viewers get 1-hour signed URLs only if `can_view_media()` allows; account deletion removes the files.
+- Messages: server-stamped time (clients cannot back- or forward-date), deleted after 7 days.
 
 - RLS on every table; discovery only through `nearby_profiles()` / `get_buddy_profile()`.
 - The service-role key is used only in `app/api/account/delete/route.ts` and `scripts/seed-dev.ts`.
@@ -176,7 +179,7 @@ Never paste secret keys into chat, issues or commits. They go only into the Supa
 ## Production
 
 - App: https://xindr.vercel.app (Vercel project `xindr`)
-- Supabase project: `Xindr` (ref `knohcgiarfsoxqhhdxbd`, region ap-northeast-2). Migrations 0001–0003 applied.
+- Supabase project: `Xindr` (ref `knohcgiarfsoxqhhdxbd`, region ap-northeast-2). Migrations 0001–0005 applied (pg_cron jobs active, private photo bucket).
 - Auth: Site URL and redirect URLs set; Google enabled; email OTP length 6. Pending: custom SMTP, then the code email template.
 
 ## Notes

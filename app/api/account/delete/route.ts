@@ -35,7 +35,18 @@ export async function POST(request: NextRequest) {
       auth: { autoRefreshToken: false, persistSession: false },
     },
   );
-  // Deleting the auth user cascades to the profile, requests, matches, messages and blocks.
+  // Photo files are not covered by the database cascade: remove the user's folder first.
+  const { data: files } = await admin.storage
+    .from("profile-photos")
+    .list(userId, { limit: 100 });
+  if (files && files.length > 0) {
+    const { error: storageError } = await admin.storage
+      .from("profile-photos")
+      .remove(files.map((f) => `${userId}/${f.name}`));
+    if (storageError) return NextResponse.json({ ok: false }, { status: 500 });
+  }
+
+  // Deleting the auth user cascades to the profile, photos rows, requests, matches, messages and blocks.
   const { error: deleteError } = await admin.auth.admin.deleteUser(userId);
   if (deleteError) return NextResponse.json({ ok: false }, { status: 500 });
 
