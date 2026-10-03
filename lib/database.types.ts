@@ -249,6 +249,9 @@ isOneToOne: false
 "cancel_request":
 { Args: { "p_request": string }; Returns: undefined
                            },
+"chats_badge":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "distance_km":
 { Args: { "lat1": number,"lat2": number,"lng1": number,"lng2": number }; Returns: number
                            },

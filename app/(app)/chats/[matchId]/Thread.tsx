@@ -9,7 +9,7 @@ import {
   useTransition,
   type KeyboardEvent,
 } from "react";
-import { endConversation, markRead, sendMessage } from "@/app/actions/chat";
+import { endConversation, sendMessage } from "@/app/actions/chat";
 import { blockUser } from "@/app/actions/safety";
 import { ReportSheet } from "@/components/ReportSheet";
 import { ActionSheet } from "@/components/ios/ActionSheet";
@@ -20,6 +20,15 @@ import { useToast } from "@/components/ios/Toast";
 import { LIMITS } from "@/lib/constants";
 import { dayLabel, sameDay, timeLabel } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
+
+// Straight to the database (one call, no server round trip). The function only
+// touches messages sent to the caller in a match they belong to.
+// Queries are lazy: nothing is sent until the builder is awaited or then()'d.
+function markRead(matchId: string) {
+  createClient()
+    .rpc("mark_messages_read", { p_match: matchId })
+    .then(() => {});
+}
 
 type Message = {
   id: string;

@@ -1,14 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { TabBar } from "@/components/ios/TabBar";
-import { getChatsBadge } from "@/lib/chats";
 import { createClient } from "@/lib/supabase/client";
 
+type MessageRow = {
+  match_id: string;
+  sender_id: string;
+  read_at: string | null;
+};
+
+/** Screens that show requests, matches or inbox previews, so they re-render on changes. */
+const showsRelationships = (path: string) =>
+  path === "/chats" || path.startsWith("/people/");
+
 /**
- * Tab bar whose Chats badge stays live. Any change to the viewer's requests, matches or
- * messages (Realtime respects RLS) refreshes the badge and the current screen.
+ * Tab bar whose Chats badge stays live (Realtime respects RLS). Changes update the badge
+ * with one small query; the screen is re-rendered only when it shows what changed, since a
+ * refresh re-runs every server query on the page. An open chat adds its own messages.
  */
 export function LiveTabBar({
   userId,
@@ -18,14 +28,17 @@ export function LiveTabBar({
   initialBadge: number;
 }) {
   const router = useRouter();
-  // Refreshing must not re-run the subscription effect, so read the router through a ref.
+  const pathname = usePathname();
+  // The subscription must not restart on navigation or refresh, so read these through refs.
   const routerRef = useRef(router);
+  const pathRef = useRef(pathname);
   useEffect(() => {
     routerRef.current = router;
-  }, [router]);
+    pathRef.current = pathname;
+  }, [router, pathname]);
   const [badge, setBadge] = useState(initialBadge);
   const [serverBadge, setServerBadge] = useState(initialBadge);
-  // A server refresh brings a fresh count; adopt it.
+  // A server render brings a fresh count; adopt it.
   if (serverBadge !== initialBadge) {
     setServerBadge(initialBadge);
     setBadge(initialBadge);
@@ -33,17 +46,35 @@ export function LiveTabBar({
 
   useEffect(() => {
     const supabase = createClient();
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    let badgeTimer: ReturnType<typeof setTimeout> | undefined;
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined;
     let active = true;
 
-    const onChange = () => {
-      clearTimeout(timer);
-      timer = setTimeout(async () => {
-        const next = await getChatsBadge(supabase, userId);
-        if (!active) return;
-        setBadge(next);
-        routerRef.current.refresh();
-      }, 250);
+    // Debounced: marking a chat read updates many rows, one event each.
+    const updateBadge = () => {
+      clearTimeout(badgeTimer);
+      badgeTimer = setTimeout(async () => {
+        const { data } = await supabase.rpc("chats_badge");
+        if (active && data !== null) setBadge(data);
+      }, 300);
+    };
+    // A refresh re-renders the layout too, which brings a fresh badge with it.
+    const refreshOrUpdateBadge = (shows: (path: string) => boolean) => {
+      if (!shows(pathRef.current)) return updateBadge();
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => routerRef.current.refresh(), 300);
+    };
+
+    const onRelationshipChange = () => refreshOrUpdateBadge(showsRelationships);
+    const onNewMessage = (m: MessageRow) => {
+      if (m.sender_id === userId) return;
+      // The open thread shows it and marks it read.
+      if (pathRef.current === `/chats/${m.match_id}`) return;
+      refreshOrUpdateBadge((path) => path === "/chats");
+    };
+    const onMessageUpdate = (m: MessageRow) => {
+      // Only my reads change my badge; ignore receipts on messages I sent.
+      if (m.sender_id !== userId && m.read_at) updateBadge();
     };
 
     const channel = supabase
@@ -57,7 +88,7 @@ export function LiveTabBar({
           table: "train_requests",
           filter: `to_user=eq.${userId}`,
         },
-        onChange,
+        onRelationshipChange,
       )
       .on(
         "postgres_changes",
@@ -67,17 +98,22 @@ export function LiveTabBar({
           table: "train_requests",
           filter: `from_user=eq.${userId}`,
         },
-        onChange,
+        onRelationshipChange,
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "matches" },
-        onChange,
+        onRelationshipChange,
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "messages" },
-        onChange,
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => onNewMessage(payload.new as MessageRow),
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages" },
+        (payload) => onMessageUpdate(payload.new as MessageRow),
       );
 
     // Realtime needs the user's token so RLS can filter events.
@@ -88,7 +124,8 @@ export function LiveTabBar({
 
     return () => {
       active = false;
-      clearTimeout(timer);
+      clearTimeout(badgeTimer);
+      clearTimeout(refreshTimer);
       supabase.removeChannel(channel);
     };
   }, [userId]);

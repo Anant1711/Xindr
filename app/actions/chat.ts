@@ -42,12 +42,6 @@ export async function sendMessage(
   return { ok: true, message: data };
 }
 
-export async function markRead(matchId: string): Promise<void> {
-  if (!uuid.safeParse(matchId).success) return;
-  const { supabase } = await session();
-  await supabase.rpc("mark_messages_read", { p_match: matchId });
-}
-
 export async function endConversation(
   matchId: string,
 ): Promise<{ ok: boolean }> {

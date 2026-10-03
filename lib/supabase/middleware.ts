@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/database.types";
 import { publicEnv } from "@/lib/env";
+import { traceOptions } from "@/lib/supabase/trace";
 
 const PUBLIC_PREFIXES = [
   "/login",
@@ -20,12 +21,15 @@ function isPublic(pathname: string) {
 
 /** Refreshes the Supabase session cookie and sends signed-out visitors to /login. */
 export async function updateSession(request: NextRequest) {
+  if (process.env.DB_TRACE === "1")
+    console.log(`[req] ${request.method} ${request.nextUrl.pathname}`);
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
     publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
+      ...traceOptions,
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll(cookiesToSet, headers) {

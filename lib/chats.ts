@@ -4,25 +4,9 @@ import type { Database } from "@/lib/database.types";
 type Client = SupabaseClient<Database>;
 
 /** Chats tab badge: incoming pending requests (still in the future) + unread messages. */
-export async function getChatsBadge(
-  supabase: Client,
-  userId: string,
-): Promise<number> {
-  const nowIso = new Date().toISOString();
-  const [incoming, conversations] = await Promise.all([
-    supabase
-      .from("train_requests")
-      .select("id", { count: "exact", head: true })
-      .eq("to_user", userId)
-      .eq("status", "pending")
-      .gt("proposed_at", nowIso),
-    supabase.rpc("my_conversations"),
-  ]);
-  const unread = (conversations.data ?? []).reduce(
-    (sum, c) => sum + Number(c.unread_count),
-    0,
-  );
-  return (incoming.count ?? 0) + unread;
+export async function getChatsBadge(supabase: Client): Promise<number> {
+  const { data } = await supabase.rpc("chats_badge");
+  return data ?? 0;
 }
 
 export async function getChatsOverview(supabase: Client, userId: string) {
