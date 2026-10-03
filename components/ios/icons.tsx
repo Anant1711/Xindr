@@ -120,3 +120,31 @@ export function ShieldIcon(props: IconProps) {
     </Svg>
   );
 }
+
+export function SlidersIcon(props: IconProps) {
+  return (
+    <Svg size={22} {...props}>
+      <path d="M3 6h18M7 12h10M10.5 18h3" />
+      <circle cx="8.5" cy="6" r="1.9" fill="white" />
+      <circle cx="15.5" cy="12" r="1.9" fill="white" />
+    </Svg>
+  );
+}
+
+export function RefreshIcon(props: IconProps) {
+  return (
+    <Svg size={18} strokeWidth={2.2} {...props}>
+      <path d="M4.4 12a7.6 7.6 0 0113-5.4M19.6 12a7.6 7.6 0 01-13 5.4" />
+      <path d="M17.5 3.5v3.3h-3.3M6.5 20.5v-3.3h3.3" />
+    </Svg>
+  );
+}
+
+export function PinIcon(props: IconProps) {
+  return (
+    <Svg size={14} strokeWidth={2} {...props}>
+      <path d="M12 21s6.5-5.8 6.5-11a6.5 6.5 0 10-13 0c0 5.2 6.5 11 6.5 11z" />
+      <circle cx="12" cy="10" r="2.4" />
+    </Svg>
+  );
+}
