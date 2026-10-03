@@ -35,7 +35,10 @@ export function NearbyHeader({ level }: { level: LevelFilter }) {
         >
           <SlidersIcon />
           {filtered ? (
-            <span aria-hidden="true" className="absolute top-2 right-2 size-2 rounded-full bg-accent" />
+            <span
+              aria-hidden="true"
+              className="absolute top-2 right-2 size-2 rounded-full bg-accent"
+            />
           ) : null}
         </button>
         <div className="flex items-center justify-center gap-1">
@@ -62,9 +65,12 @@ export function NearbyHeader({ level }: { level: LevelFilter }) {
               value={level}
               onChange={(next) => {
                 setOpen(false);
-                router.replace(next === "all" ? "/nearby" : `/nearby?level=${next}`, {
-                  scroll: false,
-                });
+                router.replace(
+                  next === "all" ? "/nearby" : `/nearby?level=${next}`,
+                  {
+                    scroll: false,
+                  },
+                );
               }}
             />
           </div>

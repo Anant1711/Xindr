@@ -18,14 +18,26 @@ export type CarouselPerson = {
 const CARD = 240;
 const GAP = 16;
 
-export function NearbyCarousel({ people, area }: { people: CarouselPerson[]; area: string }) {
+export function NearbyCarousel({
+  people,
+  area,
+}: {
+  people: CarouselPerson[];
+  area: string;
+}) {
   const strip = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const current = people[Math.min(active, people.length - 1)];
 
   function onScroll() {
     const el = strip.current;
-    if (el) setActive(Math.max(0, Math.min(people.length - 1, Math.round(el.scrollLeft / (CARD + GAP)))));
+    if (el)
+      setActive(
+        Math.max(
+          0,
+          Math.min(people.length - 1, Math.round(el.scrollLeft / (CARD + GAP))),
+        ),
+      );
   }
 
   function go(i: number) {
@@ -72,7 +84,10 @@ export function NearbyCarousel({ people, area }: { people: CarouselPerson[]; are
                       className="size-full object-cover"
                     />
                   ) : (
-                    <span aria-hidden="true" className="font-display text-[70px] text-white/95">
+                    <span
+                      aria-hidden="true"
+                      className="font-display text-[70px] text-white/95"
+                    >
                       {p.initials}
                     </span>
                   )}
@@ -82,7 +97,9 @@ export function NearbyCarousel({ people, area }: { people: CarouselPerson[]; are
                 </span>
               </div>
               <div className="flex flex-col items-center gap-1.5 text-center">
-                <span className="font-display text-[21px] leading-[24px] uppercase">{p.name}</span>
+                <span className="font-display text-[21px] leading-[24px] uppercase">
+                  {p.name}
+                </span>
                 <span className="flex items-center gap-1.5 text-[13.5px] font-medium text-secondary">
                   <PinIcon aria-hidden="true" />
                   {p.subtitle}

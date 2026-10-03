@@ -12,7 +12,10 @@ function CarouselSkeleton() {
       <span className="mx-auto h-4 w-52 animate-shimmer rounded bg-track" />
       <div className="flex flex-1 items-center justify-center gap-4 overflow-hidden pt-6 pb-4">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="flex w-[240px] shrink-0 flex-col items-center gap-[18px]">
+          <div
+            key={i}
+            className="flex w-[240px] shrink-0 flex-col items-center gap-[18px]"
+          >
             <span className="h-[300px] w-full animate-shimmer rounded-[24px] bg-track" />
             <span className="h-5 w-32 animate-shimmer rounded bg-track" />
             <span className="h-3.5 w-40 animate-shimmer rounded bg-track" />
