@@ -3,8 +3,13 @@ import type { Database } from "@/lib/database.types";
 
 export type Relationship =
   | { kind: "none" }
-  | { kind: "sent"; requestId: string; proposedAt: string }
-  | { kind: "received"; requestId: string; proposedAt: string }
+  | { kind: "sent"; requestId: string; proposedAt: string; note: string | null }
+  | {
+      kind: "received";
+      requestId: string;
+      proposedAt: string;
+      note: string | null;
+    }
   | { kind: "matched"; matchId: string };
 
 /** The viewer's current relationship with another person: active match, else the latest pending request. */
@@ -24,7 +29,7 @@ export async function getRelationship(
       .maybeSingle(),
     supabase
       .from("train_requests")
-      .select("id, from_user, proposed_at")
+      .select("id, from_user, proposed_at, note")
       .eq("status", "pending")
       .or(
         `and(from_user.eq.${me},to_user.eq.${them}),and(from_user.eq.${them},to_user.eq.${me})`,
@@ -38,11 +43,12 @@ export async function getRelationship(
 
   if (match.data) return { kind: "matched", matchId: match.data.id };
   if (request.data) {
-    const { id, from_user, proposed_at } = request.data;
+    const { id, from_user, proposed_at, note } = request.data;
     return {
       kind: from_user === me ? "sent" : "received",
       requestId: id,
       proposedAt: proposed_at,
+      note,
     };
   }
   return { kind: "none" };

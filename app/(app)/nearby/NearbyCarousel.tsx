@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { avatarColor } from "@/components/ios/Avatar";
-import { buttonClass } from "@/components/ios/Button";
 import { ChevronLeft, ChevronRight, PinIcon } from "@/components/ios/icons";
 
 export type CarouselPerson = {
@@ -137,18 +136,6 @@ export function NearbyCarousel({
       <p className="sr-only" aria-live="polite">
         {current ? `${current.name}, ${active + 1} of ${people.length}` : ""}
       </p>
-
-      {current ? (
-        <div className="px-6 pt-2 pb-5">
-          <Link
-            href={`/people/${current.id}/ask`}
-            aria-label={`Ask ${current.name} to train`}
-            className={`${buttonClass()} rounded-2xl!`}
-          >
-            Ask to Train
-          </Link>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -103,6 +103,21 @@ export default async function BuddyPage(props: PageProps<"/people/[id]">) {
         ) : null}
       </dl>
 
+      {(relationship.kind === "received" || relationship.kind === "sent") &&
+      relationship.note ? (
+        <section className="mb-6">
+          <SectionLabel>
+            {relationship.kind === "received"
+              ? `${person.first_name}'s message`
+              : "Your message"}
+          </SectionLabel>
+          {/* Plain text only; never rendered as HTML. */}
+          <p className="mx-5 rounded-group bg-accent-tint px-4 py-3 text-[15px] break-words whitespace-pre-wrap">
+            {relationship.note}
+          </p>
+        </section>
+      ) : null}
+
       <section className="mb-6">
         <SectionLabel>Your overlap</SectionLabel>
         <div className="mx-5 flex flex-col gap-2.5 rounded-group bg-success-tint p-4">

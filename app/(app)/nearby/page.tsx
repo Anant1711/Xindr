@@ -22,9 +22,6 @@ function CarouselSkeleton() {
           </div>
         ))}
       </div>
-      <div className="px-6 pt-2 pb-5">
-        <span className="block h-[54px] animate-shimmer rounded-2xl bg-track" />
-      </div>
     </div>
   );
 }
