@@ -8,6 +8,7 @@ import { requireProfile } from "@/lib/auth";
 import { levelLabel } from "@/lib/format";
 import { nameFor } from "@/lib/names";
 import { signedPhotoUrls } from "@/lib/photos/server";
+import { loadMyProfile } from "@/lib/views";
 import { PhotosSection } from "./PhotosSection";
 import {
   DeleteAccountRow,
@@ -22,33 +23,15 @@ const SHOW_ME_LABEL = { women: "Women", men: "Men", anyone: "Anyone" } as const;
 
 export default async function ProfilePage() {
   const { supabase, userId } = await requireProfile();
-  const [{ data: me }, blocked, lastName, ownPhotos] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select(
-        "first_name, last_initial, level, show_me, is_active, areas(name)",
-      )
-      .eq("id", userId)
-      .single(),
-    supabase.rpc("my_blocked_people"),
-    supabase.rpc("visible_last_name", { p_id: userId }),
-    supabase
-      .from("profile_photos")
-      .select("id, path, position")
-      .eq("user_id", userId)
-      .order("position"),
-  ]);
-  if (!me) throw new Error("Could not load profile");
-  const blockedCount = blocked.data?.length ?? 0;
-  const rows = ownPhotos.data ?? [];
-  const urls = await signedPhotoUrls(
-    supabase,
-    rows.map((r) => r.path),
-  );
-  const photos = rows.map((r) => ({
+  const me = await loadMyProfile(supabase);
+  const blockedCount = me.blocked_count;
+  // Thumbnails for the small tiles and avatar; older photos fall back to the full image.
+  const shown = me.photos.map((r) => r.thumb_path ?? r.path);
+  const urls = await signedPhotoUrls(supabase, userId, shown);
+  const photos = me.photos.map((r, i) => ({
     id: r.id,
     position: r.position,
-    url: urls.get(r.path) ?? null,
+    url: urls.get(shown[i]) ?? null,
   }));
 
   return (
@@ -65,10 +48,10 @@ export default async function ProfilePage() {
         />
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-[20px] leading-[22px]">
-            {nameFor(me.first_name, me.last_initial, lastName.data)}
+            {nameFor(me.first_name, me.last_initial, me.last_name)}
           </p>
           <p className="mt-1 truncate text-sub text-secondary">
-            {levelLabel(me.level)} · {me.areas.name}
+            {levelLabel(me.level)} · {me.area}
           </p>
         </div>
         <Link

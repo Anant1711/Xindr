@@ -64,6 +64,9 @@ export function NearbyCarousel({
             <Link
               key={p.id}
               href={`/people/${p.id}`}
+              // Profiles are fully dynamic, so a prefetch carries no data; it would only
+              // add a server request for every card swiped into view.
+              prefetch={false}
               aria-label={`${p.name}, ${p.subtitle}. Open profile`}
               onFocus={() => go(i)}
               className="group flex w-[240px] shrink-0 snap-center flex-col items-center gap-[18px] rounded-[24px] focus-visible:outline-none"

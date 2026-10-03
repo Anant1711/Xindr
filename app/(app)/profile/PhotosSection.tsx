@@ -32,13 +32,27 @@ export function PhotosSection({
   async function upload(file: File) {
     setUploading(true);
     try {
-      const { blob, width, height } = await encodePhoto(file);
-      const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const { error } = await createClient()
-        .storage.from(BUCKET)
-        .upload(path, blob, { contentType: "image/jpeg", upsert: false });
-      if (error) throw new PhotoError("Upload failed. Please try again.");
-      const res = await addPhoto({ path, width, height });
+      const { blob, thumb, width, height } = await encodePhoto(file);
+      const id = crypto.randomUUID();
+      const path = `${userId}/${id}.jpg`;
+      const thumbPath = `${userId}/${id}.t.jpg`;
+      const bucket = createClient().storage.from(BUCKET);
+      const options = { contentType: "image/jpeg", upsert: false };
+      const [main, small] = await Promise.all([
+        bucket.upload(path, blob, options),
+        bucket.upload(thumbPath, thumb, options),
+      ]);
+      if (main.error) {
+        if (!small.error) await bucket.remove([thumbPath]);
+        throw new PhotoError("Upload failed. Please try again.");
+      }
+      // The thumbnail is optional: without it, small places show the full photo.
+      const res = await addPhoto({
+        path,
+        thumbPath: small.error ? null : thumbPath,
+        width,
+        height,
+      });
       if (!res.ok) throw new PhotoError(res.error);
       toast.show("Photo added");
       router.refresh();

@@ -3,13 +3,10 @@ import { InviteButton } from "@/components/InviteButton";
 import { buttonClass } from "@/components/ios/Button";
 import { StateMessage } from "@/components/ios/StateMessage";
 import { requireProfile } from "@/lib/auth";
-import {
-  buddyCardsSchema,
-  type BuddyCard,
-  type LevelFilter,
-} from "@/lib/buddy";
+import type { BuddyCard, LevelFilter } from "@/lib/buddy";
 import { displayName, levelLabel } from "@/lib/format";
 import { signedPhotoUrls } from "@/lib/photos/server";
+import { loadNearby } from "@/lib/views";
 import { NearbyCarousel, type CarouselPerson } from "./NearbyCarousel";
 
 /** "Same area" or the rounded km between area centres. */
@@ -22,18 +19,10 @@ function distanceText(p: BuddyCard) {
 export async function NearbyList({ level }: { level: LevelFilter }) {
   const { supabase, userId } = await requireProfile();
 
-  const [me, nearby] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("is_active, areas(name)")
-      .eq("id", userId)
-      .single(),
-    supabase.rpc("nearby_profiles", level === "all" ? {} : { p_level: level }),
-  ]);
-  if (me.error || nearby.error) throw new Error("Could not load nearby people");
+  const view = await loadNearby(supabase, level);
 
   // Discovery needs both people active, so a paused profile sees no one.
-  if (!me.data.is_active) {
+  if (!view.active) {
     return (
       <StateMessage
         title="Your profile is paused"
@@ -47,16 +36,11 @@ export async function NearbyList({ level }: { level: LevelFilter }) {
     );
   }
 
-  const people = buddyCardsSchema.parse(nearby.data);
-  const { data: covers } = people.length
-    ? await supabase.rpc("main_photos", { p_ids: people.map((p) => p.id) })
-    : { data: [] };
+  const people = view.people;
   const urls = await signedPhotoUrls(
     supabase,
-    (covers ?? []).map((c) => c.path),
-  );
-  const photoOf = new Map(
-    (covers ?? []).map((c) => [c.user_id, urls.get(c.path) ?? null]),
+    userId,
+    people.flatMap((p) => (p.photo_path ? [p.photo_path] : [])),
   );
 
   if (people.length === 0) {
@@ -79,7 +63,7 @@ export async function NearbyList({ level }: { level: LevelFilter }) {
     initials: (p.first_name.charAt(0) + p.last_initial.charAt(0)).toUpperCase(),
     badge: p.same_gym ? "Same gym" : distanceText(p),
     subtitle: `${levelLabel(p.level)} · ${distanceText(p)}`,
-    photo: photoOf.get(p.id) ?? null,
+    photo: (p.photo_path && urls.get(p.photo_path)) || null,
   }));
 
   // Remount on a new result set so the carousel starts at the first person again.
@@ -87,7 +71,7 @@ export async function NearbyList({ level }: { level: LevelFilter }) {
     <NearbyCarousel
       key={cards.map((c) => c.id).join()}
       people={cards}
-      area={me.data.areas.name}
+      area={view.area}
     />
   );
 }

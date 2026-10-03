@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getAuthState } from "@/lib/auth";
+import { getSignedInUser } from "@/lib/auth";
 import { reportSchema } from "@/lib/validation";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
@@ -12,7 +12,7 @@ const GENERIC = "Something went wrong. Please try again.";
 const uuid = z.uuid();
 
 async function session() {
-  const { supabase, userId } = await getAuthState();
+  const { supabase, userId } = await getSignedInUser();
   if (!userId) redirect("/login");
   return supabase;
 }
@@ -33,7 +33,7 @@ export async function reportUser(input: {
 }): Promise<ActionResult> {
   const parsed = reportSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Choose a reason." };
-  const { supabase, userId } = await getAuthState();
+  const { supabase, userId } = await getSignedInUser();
   if (!userId) redirect("/login");
   const { error } = await supabase.from("reports").insert({
     reporter_id: userId,

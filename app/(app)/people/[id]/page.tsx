@@ -4,7 +4,6 @@ import { Avatar } from "@/components/ios/Avatar";
 import { DayPills } from "@/components/ios/DayPills";
 import { SectionLabel } from "@/components/ios/ListGroup";
 import { requireProfile } from "@/lib/auth";
-import { buddyCardsSchema } from "@/lib/buddy";
 import {
   distanceLabel,
   genderLabel,
@@ -14,7 +13,8 @@ import {
 } from "@/lib/format";
 import { nameFor } from "@/lib/names";
 import { signedPhotoUrls } from "@/lib/photos/server";
-import { getRelationship } from "@/lib/relationship";
+import { relationshipOf } from "@/lib/relationship";
+import { loadPerson } from "@/lib/views";
 import { BuddyActions } from "./BuddyActions";
 import { BuddyNav } from "./BuddyNav";
 import { PhotoGallery } from "./PhotoGallery";
@@ -29,26 +29,19 @@ export default async function BuddyPage(props: PageProps<"/people/[id]">) {
   const { supabase, userId } = await requireProfile();
   if (id === userId) notFound();
 
-  const { data, error } = await supabase.rpc("get_buddy_profile", { p_id: id });
-  if (error) throw new Error("Could not load profile");
-  const person = buddyCardsSchema.parse(data)[0];
-  if (!person) notFound();
-
-  const relationship = await getRelationship(supabase, userId, id);
-  // Full last name only once matched (the function returns null otherwise).
-  const lastName =
-    relationship.kind === "matched"
-      ? (await supabase.rpc("visible_last_name", { p_id: id })).data
-      : null;
+  const view = await loadPerson(supabase, id);
+  if (!view) notFound();
+  const person = view.card;
+  const relationship = relationshipOf(view);
+  // Full last name only once matched.
+  const lastName = relationship.kind === "matched" ? view.last_name : null;
   const name = nameFor(person.first_name, person.last_initial, lastName);
-  const { data: photoRows } = await supabase.rpc("profile_photos_of", {
-    p_id: id,
-  });
   const photoUrls = await signedPhotoUrls(
     supabase,
-    (photoRows ?? []).map((r) => r.path),
+    userId,
+    view.photos.map((r) => r.path),
   );
-  const photos = (photoRows ?? []).flatMap((r) => {
+  const photos = view.photos.flatMap((r) => {
     const url = photoUrls.get(r.path);
     return url ? [{ url, width: r.width, height: r.height }] : [];
   });

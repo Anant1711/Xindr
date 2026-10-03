@@ -139,13 +139,13 @@ isOneToOne: false
                   ]
                 },"profile_photos": {
                   Row: {
-                    "created_at": string,"height": number | null,"id": string,"path": string,"position": number,"user_id": string,"width": number | null
+                    "created_at": string,"height": number | null,"id": string,"path": string,"position": number,"thumb_path": string | null,"user_id": string,"width": number | null
                   }
                   Insert: {
-                    "created_at"?: string,"height"?: number | null,"id"?: string,"path": string,"position": number,"user_id": string,"width"?: number | null
+                    "created_at"?: string,"height"?: number | null,"id"?: string,"path": string,"position": number,"thumb_path"?: string | null,"user_id": string,"width"?: number | null
                   }
                   Update: {
-                    "created_at"?: string,"height"?: number | null,"id"?: string,"path"?: string,"position"?: number,"user_id"?: string,"width"?: number | null
+                    "created_at"?: string,"height"?: number | null,"id"?: string,"path"?: string,"position"?: number,"thumb_path"?: string | null,"user_id"?: string,"width"?: number | null
                   }
                   Relationships: [
                     {
@@ -237,8 +237,14 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "block_user":
+            "app_session":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"block_user":
 { Args: { "p_target": string }; Returns: undefined
+                           },
+"broadcast_to":
+{ Args: { "p_event": string,"p_payload": Json,"p_users": (string)[] }; Returns: undefined
                            },
 "can_see":
 { Args: { "target": string,"viewer": string }; Returns: boolean
@@ -251,6 +257,9 @@ isOneToOne: false
                            },
 "chats_badge":
 { Args: Record<PropertyKey, never>; Returns: number
+                           },
+"chats_view":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "distance_km":
 { Args: { "lat1": number,"lat2": number,"lng1": number,"lng2": number }; Returns: number
@@ -306,16 +315,25 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"nearby_view":
+{ Args: { "p_level"?: Database["public"]['Enums']["level_t"] }; Returns: Json
+                           },
+"person_view":
+{ Args: { "p_id": string }; Returns: Json
+                           },
 "profile_photos_of":
 { Args: { "p_id": string }; Returns: {
               "height": number,"path": string,"position": number,"width": number
             }[]
                            },
+"profile_view":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "purge_old_messages":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "remove_photo":
-{ Args: { "p_photo": string }; Returns: string
+{ Args: { "p_photo": string }; Returns: (string)[]
                            },
 "respond_to_request":
 { Args: { "p_accept": boolean,"p_request": string }; Returns: string
@@ -325,6 +343,9 @@ isOneToOne: false
                            },
 "shared_days":
 { Args: { "a": string,"b": string }; Returns: (number)[]
+                           },
+"thread_view":
+{ Args: { "p_limit"?: number,"p_match": string }; Returns: Json
                            },
 "visible_last_name":
 { Args: { "p_id": string }; Returns: string

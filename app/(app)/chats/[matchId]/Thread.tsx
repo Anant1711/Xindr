@@ -9,7 +9,7 @@ import {
   useTransition,
   type KeyboardEvent,
 } from "react";
-import { endConversation, sendMessage } from "@/app/actions/chat";
+import { endConversation } from "@/app/actions/chat";
 import { blockUser } from "@/app/actions/safety";
 import { ReportSheet } from "@/components/ReportSheet";
 import { ActionSheet } from "@/components/ios/ActionSheet";
@@ -19,7 +19,9 @@ import { BackButton, IconButton } from "@/components/ios/NavBar";
 import { useToast } from "@/components/ios/Toast";
 import { LIMITS } from "@/lib/constants";
 import { dayLabel, sameDay, timeLabel } from "@/lib/format";
+import { notifyRead, onLive } from "@/lib/live";
 import { createClient } from "@/lib/supabase/client";
+import { messageSchema } from "@/lib/validation";
 
 // Straight to the database (one call, no server round trip). The function only
 // touches messages sent to the caller in a match they belong to.
@@ -27,8 +29,12 @@ import { createClient } from "@/lib/supabase/client";
 function markRead(matchId: string) {
   createClient()
     .rpc("mark_messages_read", { p_match: matchId })
-    .then(() => {});
+    .then(({ error }) => {
+      if (!error) notifyRead();
+    });
 }
+
+const PAGE = 50;
 
 type Message = {
   id: string;
@@ -46,6 +52,8 @@ type Props = {
   plan: string | null;
   ended: boolean;
   initialMessages: Message[];
+  /** Older messages exist beyond the first page. */
+  initialHasMore: boolean;
 };
 
 const GROUP_GAP_MS = 5 * 60 * 1000;
@@ -61,10 +69,13 @@ export function Thread({
   plan,
   ended: initiallyEnded,
   initialMessages,
+  initialHasMore,
 }: Props) {
   const toast = useToast();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [ended, setEnded] = useState(initiallyEnded);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [draft, setDraft] = useState("");
   const [sheet, setSheet] = useState<
     "menu" | "end" | "block" | "report" | null
@@ -84,51 +95,55 @@ export function Thread({
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [matchId]);
 
-  // Live messages and the match ending (Realtime respects RLS).
-  useEffect(() => {
-    const supabase = createClient();
-    let active = true;
-    const channel = supabase
-      .channel(`thread-${matchId}-${crypto.randomUUID()}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `match_id=eq.${matchId}`,
-        },
-        (payload) => {
-          const m = payload.new as Message;
-          setMessages((cur) =>
-            cur.some((x) => x.id === m.id) ? cur : [...cur, m].sort(byTime),
-          );
-          if (m.sender_id !== meId && document.visibilityState === "visible")
-            markRead(matchId);
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "matches",
-          filter: `id=eq.${matchId}`,
-        },
-        (payload) => {
-          if ((payload.new as { ended_at: string | null }).ended_at)
-            setEnded(true);
-        },
-      );
-    const subscribe = () => {
-      if (active) channel.subscribe();
-    };
-    supabase.realtime.setAuth().then(subscribe, subscribe);
-    return () => {
-      active = false;
-      supabase.removeChannel(channel);
-    };
-  }, [matchId, meId]);
+  // Live messages and the match ending (events for this user only; see lib/live).
+  useEffect(
+    () =>
+      onLive((event) => {
+        if (event.type === "match" && event.id === matchId && event.ended)
+          setEnded(true);
+        if (event.type !== "message" || event.message.match_id !== matchId)
+          return;
+        const m = event.message;
+        setMessages((cur) =>
+          cur.some((x) => x.id === m.id) ? cur : [...cur, m].sort(byTime),
+        );
+        if (m.sender_id !== meId && document.visibilityState === "visible")
+          markRead(matchId);
+      }),
+    [matchId, meId],
+  );
+
+  // Older messages, a page at a time (RLS limits reads to this chat's two people).
+  async function loadEarlier() {
+    const oldest = messages.find((m) => !m.status);
+    if (!oldest || loadingEarlier) return;
+    setLoadingEarlier(true);
+    const { data, error } = await createClient()
+      .from("messages")
+      .select("id, sender_id, body, created_at")
+      .eq("match_id", matchId)
+      .lt("created_at", oldest.created_at)
+      .order("created_at", { ascending: false })
+      .limit(PAGE + 1);
+    setLoadingEarlier(false);
+    if (error) {
+      toast.show("Couldn't load earlier messages.");
+      return;
+    }
+    const el = scroller.current;
+    const fromBottom = el ? el.scrollHeight - el.scrollTop : 0;
+    stickToBottom.current = false;
+    setHasMore(data.length > PAGE);
+    setMessages((cur) => {
+      const known = new Set(cur.map((m) => m.id));
+      const older = data.slice(0, PAGE).filter((m) => !known.has(m.id));
+      return [...older, ...cur].sort(byTime);
+    });
+    // Keep the reader's place after the older messages are inserted above.
+    requestAnimationFrame(() => {
+      if (el) el.scrollTop = el.scrollHeight - fromBottom;
+    });
+  }
 
   // Keep the newest message in view unless the reader has scrolled up.
   useLayoutEffect(() => {
@@ -151,25 +166,31 @@ export function Thread({
       if (ended) setEnded(true);
     };
     startTransition(async () => {
-      let res: Awaited<ReturnType<typeof sendMessage>>;
-      try {
-        res = await sendMessage(matchId, body);
-      } catch {
-        // Offline or the request failed: keep the text and offer a retry.
-        fail();
-        return;
+      const text = messageSchema.safeParse(body);
+      if (!text.success) return fail();
+      // Straight to the database: RLS only accepts my own messages in an active chat,
+      // and a trigger stamps the server time.
+      const supabase = createClient();
+      const { data: sent, error } = await supabase
+        .from("messages")
+        .insert({ match_id: matchId, sender_id: meId, body: text.data })
+        .select("id, sender_id, body, created_at")
+        .single();
+      if (error || !sent) {
+        // Offline, or the chat has ended (then lock the thread).
+        const { data: match } = await supabase
+          .from("matches")
+          .select("ended_at")
+          .eq("id", matchId)
+          .maybeSingle();
+        return fail(Boolean(match?.ended_at));
       }
-      if (!res.ok) {
-        fail(res.ended);
-        return;
-      }
-      const sent = res.message;
-      // Realtime may have delivered the real row already; drop the temp either way.
+      // The live event may have delivered the real row already; drop the temp either way.
       setMessages((cur) => {
         const rest = cur.filter((m) => m.id !== tempId);
         return rest.some((m) => m.id === sent.id)
           ? rest
-          : [...rest, { ...sent, sender_id: meId }].sort(byTime);
+          : [...rest, sent].sort(byTime);
       });
     });
   }
@@ -255,6 +276,18 @@ export function Thread({
         <p className="mb-2 text-center text-[11.5px] text-secondary">
           Messages are kept for 7 days.
         </p>
+        {hasMore ? (
+          <div className="mb-2 flex justify-center">
+            <button
+              type="button"
+              onClick={loadEarlier}
+              disabled={loadingEarlier}
+              className="rounded-full bg-surface px-3.5 py-1.5 text-[12.5px] font-semibold text-accent disabled:opacity-60"
+            >
+              {loadingEarlier ? "Loading…" : "Load earlier messages"}
+            </button>
+          </div>
+        ) : null}
         {messages.length === 0 ? (
           <p className="mx-auto mt-10 max-w-[260px] text-center text-sub text-secondary">
             Say hello and confirm the plan. First sessions happen at the gym, in

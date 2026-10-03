@@ -13,13 +13,14 @@ insert into profiles (id, first_name, last_initial, gender, level, area_id, time
   ('cccccccc-0000-0000-0000-000000000000', 'Chetan', 'C', 'man',   'beginner', 1, 'evening', '{0}', 'anyone', false, now()),
   ('dddddddd-0000-0000-0000-000000000000', 'Dia',    'D', 'woman', 'beginner', 1, 'evening', '{0}', 'anyone', false, now());
 
-insert into profile_photos (id, user_id, path, position) values
+insert into profile_photos (id, user_id, path, thumb_path, position) values
   ('a1111111-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-000000000000',
-   'aaaaaaaa-0000-0000-0000-000000000000/11111111-0000-0000-0000-000000000000.jpg', 0),
+   'aaaaaaaa-0000-0000-0000-000000000000/11111111-0000-0000-0000-000000000000.jpg', null, 0),
   ('a2222222-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-000000000000',
-   'aaaaaaaa-0000-0000-0000-000000000000/22222222-0000-0000-0000-000000000000.jpg', 1),
+   'aaaaaaaa-0000-0000-0000-000000000000/22222222-0000-0000-0000-000000000000.jpg',
+   'aaaaaaaa-0000-0000-0000-000000000000/22222222-0000-0000-0000-000000000000.t.jpg', 1),
   ('d1111111-0000-0000-0000-000000000000', 'dddddddd-0000-0000-0000-000000000000',
-   'dddddddd-0000-0000-0000-000000000000/11111111-0000-0000-0000-000000000000.jpg', 0);
+   'dddddddd-0000-0000-0000-000000000000/11111111-0000-0000-0000-000000000000.jpg', null, 0);
 insert into storage.objects (bucket_id, name) values
   ('profile-photos', 'aaaaaaaa-0000-0000-0000-000000000000/11111111-0000-0000-0000-000000000000.jpg');
 
@@ -75,8 +76,9 @@ select results_eq($$select id from profile_photos where user_id = 'aaaaaaaa-0000
   $$values ('a2222222-0000-0000-0000-000000000000'::uuid), ('a1111111-0000-0000-0000-000000000000'::uuid)$$,
   'make_main_photo moves a photo to the front and keeps the rest in order');
 select is(remove_photo('a2222222-0000-0000-0000-000000000000'),
-  'aaaaaaaa-0000-0000-0000-000000000000/22222222-0000-0000-0000-000000000000.jpg',
-  'remove_photo returns the file path to delete');
+  array['aaaaaaaa-0000-0000-0000-000000000000/22222222-0000-0000-0000-000000000000.jpg',
+        'aaaaaaaa-0000-0000-0000-000000000000/22222222-0000-0000-0000-000000000000.t.jpg'],
+  'remove_photo returns the photo and thumbnail files to delete');
 select results_eq($$select position from profile_photos where user_id = 'aaaaaaaa-0000-0000-0000-000000000000' order by position$$,
   $$values (0::smallint), (1::smallint)$$,
   'positions close the gap after a removal');

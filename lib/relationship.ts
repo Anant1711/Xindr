@@ -1,5 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/database.types";
+import type { PersonView } from "@/lib/views";
 
 export type Relationship =
   | { kind: "none" }
@@ -12,40 +11,13 @@ export type Relationship =
     }
   | { kind: "matched"; matchId: string };
 
-/** The viewer's current relationship with another person: active match, else the latest pending request. */
-export async function getRelationship(
-  supabase: SupabaseClient<Database>,
-  me: string,
-  them: string,
-): Promise<Relationship> {
-  const [userA, userB] = me < them ? [me, them] : [them, me];
-  const [match, request] = await Promise.all([
-    supabase
-      .from("matches")
-      .select("id")
-      .eq("user_a", userA)
-      .eq("user_b", userB)
-      .is("ended_at", null)
-      .maybeSingle(),
-    supabase
-      .from("train_requests")
-      .select("id, from_user, proposed_at, note")
-      .eq("status", "pending")
-      .or(
-        `and(from_user.eq.${me},to_user.eq.${them}),and(from_user.eq.${them},to_user.eq.${me})`,
-      )
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
-  if (match.error || request.error)
-    throw new Error("Could not load relationship");
-
-  if (match.data) return { kind: "matched", matchId: match.data.id };
-  if (request.data) {
-    const { id, from_user, proposed_at, note } = request.data;
+/** The viewer's relationship with a person: active match, else the latest pending request. */
+export function relationshipOf(view: PersonView): Relationship {
+  if (view.match_id) return { kind: "matched", matchId: view.match_id };
+  if (view.request) {
+    const { id, from_me, proposed_at, note } = view.request;
     return {
-      kind: from_user === me ? "sent" : "received",
+      kind: from_me ? "sent" : "received",
       requestId: id,
       proposedAt: proposed_at,
       note,

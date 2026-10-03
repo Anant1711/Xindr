@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getAuthState } from "@/lib/auth";
+import { getSignedInUser } from "@/lib/auth";
 import { LIMITS } from "@/lib/constants";
 
 const GENERIC = "Something went wrong. Please try again.";
@@ -19,7 +19,7 @@ export type RespondResult =
 export type CancelResult = { ok: true } | { ok: false; error: string };
 
 async function session() {
-  const { supabase, userId } = await getAuthState();
+  const { supabase, userId } = await getSignedInUser();
   if (!userId) redirect("/login");
   return supabase;
 }
