@@ -243,6 +243,9 @@ export function Thread({
         aria-label={`Conversation with ${other.name}`}
         className="flex-1 overflow-y-auto overscroll-contain px-4 py-4"
       >
+        <p className="mb-2 text-center text-[11.5px] text-secondary">
+          Messages are kept for 7 days.
+        </p>
         {messages.length === 0 ? (
           <p className="mx-auto mt-10 max-w-[260px] text-center text-sub text-secondary">
             Say hello and confirm the plan. First sessions happen at the gym, in
